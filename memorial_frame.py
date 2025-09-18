@@ -628,16 +628,18 @@ class MemorialCalculoFrame(tk.Frame):
         tk.Label(s4_container, text="20", font=FONTE_PEQUENA, width=6, relief="solid", bd=1, bg='white').grid(row=0, column=1, sticky="nsew")
         # --- End of Change ---
 
-        self._cell(f, 0, 5, "")
-        self._cell(f, 0, 6, "")
-        self._cell(f, 0, 7, "")
+        self._cell(f, 0, 5, "630")
+        self._cell(f, 0, 6, "1L")
+        self._cell(f, 0, 7, "T.Definido", font=FONTE_PEQUENA)
+        
         s8 = tk.Frame(f, bd=0, bg='white')
         s8.grid(row=0, column=8, sticky="nsew")
         s8.grid_columnconfigure(0, weight=1)
         s8.grid_columnconfigure(1, weight=1)
         s8.grid_rowconfigure(0, weight=1)
-        self._cell(s8, 0, 0, "")
-        self._cell(s8, 0, 1, "")
+        tk.Label(s8, text="Lenta", font=FONTE_PEQUENA, width=6, relief="solid", bd=1, bg='white').grid(row=0, column=0, sticky="nsew")
+        tk.Label(s8, text="20", font=FONTE_PEQUENA, width=6, relief="solid", bd=1, bg='white').grid(row=0, column=1, sticky="nsew")
+
         f.pack(pady=(0, 5))
         tables_storage.append(f)
     
