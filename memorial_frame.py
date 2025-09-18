@@ -604,7 +604,7 @@ class MemorialCalculoFrame(tk.Frame):
         self.criar_tabela_grupo4(parent, tables_storage)
 
     def criar_tabela_grupo4(self, parent, tables_storage):
-        f = tk.Frame(parent, bd=1, relief="solid"); [f.grid_columnconfigure(i, minsize=w) for i, w in enumerate(self.col_widths)]; f.grid_rowconfigure(0, minsize=60, weight=1); self._cell(f, 0, 0, "Grupo 4"); self._cell(f, 0, 1, "630"); self._cell(f, 0, 2, "1L"); self._cell(f, 0, 3, ""); s4 = tk.Frame(f, bd=0, bg='white'); s4.grid(row=0, column=4, sticky="nsew"); s4.grid_columnconfigure(0, weight=1); s4.grid_columnconfigure(1, weight=1); s4.grid_rowconfigure(0, weight=1); self._cell(s4, 0, 0, ""); self._cell(s4, 0, 1, ""); self._cell(f, 0, 5, ""); self._cell(f, 0, 6, ""); self._cell(f, 0, 7, ""); s8 = tk.Frame(f, bd=0, bg='white'); s8.grid(row=0, column=8, sticky="nsew"); s8.grid_columnconfigure(0, weight=1); s8.grid_columnconfigure(1, weight=1); s8.grid_rowconfigure(0, weight=1); self._cell(s8, 0, 0, ""); self._cell(s8, 0, 1, ""); f.pack(pady=(0, 5)); tables_storage.append(f)
+        f = tk.Frame(parent, bd=1, relief="solid"); [f.grid_columnconfigure(i, minsize=w) for i, w in enumerate(self.col_widths)]; f.grid_rowconfigure(0, minsize=60, weight=1); self._cell(f, 0, 0, "Grupo 4"); self._cell(f, 0, 1, "630"); self._cell(f, 0, 2, "1L"); self._cell(f, 0, 3, "T.Definido", font=FONTE_PEQUENA); s4 = tk.Frame(f, bd=0, bg='white'); s4.grid(row=0, column=4, sticky="nsew"); s4.grid_columnconfigure(0, weight=1); s4.grid_columnconfigure(1, weight=1); s4.grid_rowconfigure(0, weight=1); self._cell(s4, 0, 0, ""); self._cell(s4, 0, 1, ""); self._cell(f, 0, 5, ""); self._cell(f, 0, 6, ""); self._cell(f, 0, 7, ""); s8 = tk.Frame(f, bd=0, bg='white'); s8.grid(row=0, column=8, sticky="nsew"); s8.grid_columnconfigure(0, weight=1); s8.grid_columnconfigure(1, weight=1); s8.grid_rowconfigure(0, weight=1); self._cell(s8, 0, 0, ""); self._cell(s8, 0, 1, ""); f.pack(pady=(0, 5)); tables_storage.append(f)
     
     def _set_widgets_state(self, parent, new_state):
         for child in parent.winfo_children():
@@ -647,9 +647,11 @@ class MemorialCalculoFrame(tk.Frame):
         widget = event.widget
         widget.after(10, lambda: widget.event_generate('<Down>'))
 
-    def _cell(self, frame, r, c, txt="", rs=1, cs=1, sticky="nsew"):
+    def _cell(self, frame, r, c, txt="", rs=1, cs=1, sticky="nsew", font=None):
         outer = tk.Frame(frame, relief="solid", bd=1, bg='white'); outer.grid(row=r, column=c, rowspan=rs, columnspan=cs, sticky=sticky)
-        if txt: tk.Label(outer, text=txt, font=FONTE_PADRAO, bg='white').pack(fill="both", expand=True)
+        if txt:
+            font_to_use = font if font else FONTE_PADRAO
+            tk.Label(outer, text=txt, font=font_to_use, bg='white').pack(fill="both", expand=True)
         return outer
     def _limitar_tamanho(self, P, max_len_str): return len(P) <= int(max_len_str)
     def formatar_siom(self, *args):
