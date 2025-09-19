@@ -77,19 +77,126 @@ class DetalhesWindow(tk.Toplevel):
         return outer
 
     def criar_layout_visualizacao(self):
-        main_form_frame = tk.Frame(self.scrollable_frame); main_form_frame.pack(pady=10, padx=10); frame_campos = tk.Frame(main_form_frame); frame_campos.pack(pady=10, padx=10, fill="x"); wrap_tabelas = tk.Frame(main_form_frame); wrap_tabelas.pack(pady=10, anchor="center"); d = self.dados_ficha
-        row1 = tk.Frame(frame_campos); row1.pack(fill="x", pady=1); tk.Label(row1, text="Autor", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row1, d.get("autor"), width=40).pack(side="left", padx=(0,5)); tk.Label(row1, text="Data", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row1, d.get("data"), width=11).pack(side="left", padx=(0,5)); tk.Label(row1, text="NS", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row1, d.get("ns")).pack(side="left", padx=(0,5))
-        row2 = tk.Frame(frame_campos); row2.pack(fill="x", pady=1); tk.Label(row2, text="Eqpto", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row2, d.get("eqpto"), width=10).pack(side="left", padx=(0,5)); tk.Label(row2, text="Condição", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row2, d.get("condição"), width=16).pack(side="left", padx=(0,5)); tk.Label(row2, text="Coord", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row2, d.get("coord")).pack(side="left", padx=(0,5)); tk.Label(row2, text="Malha", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row2, d.get("malha"), width=16).pack(side="left", padx=(0,5)); tk.Label(row2, text="Alimentador", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row2, d.get("alimentador"), width=10).pack(side="left", padx=(0,5))
-        row3 = tk.Frame(frame_campos); row3.pack(fill="x", pady=1); tk.Label(row3, text="Motivador", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row3, d.get("motivador"), width=14).pack(side="left", padx=(0,5)); tk.Label(row3, text="Endereço", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row3, d.get("endereço")).pack(side="left", padx=(0,5), fill="x", expand=True); tk.Label(row3, text="Mídia", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row3, d.get("mídia"), width=14).pack(side="left", padx=(0,5))
-        row4 = tk.Frame(frame_campos); row4.pack(fill="x", pady=1); tk.Label(row4, text="Fabricante", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row4, d.get("fabricante"), width=28).pack(side="left", padx=(0,5)); tk.Label(row4, text="Modelo", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row4, d.get("modelo")).pack(side="left", padx=(0,5)); tk.Label(row4, text="Comando", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row4, d.get("comando")).pack(side="left", padx=(0,5)); tk.Label(row4, text="Telecontrolado", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row4, d.get("telecontrolado"), width=8).pack(side="left", padx=(0,5)); tk.Label(row4, text="Siom", relief="solid", bd=1, anchor="e", font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row4, d.get("siom"), width=10).pack(side="left", padx=(0,5))
-        row_bypass = tk.Frame(frame_campos); row_bypass.pack(fill="x", pady=1); tk.Label(row_bypass, text="Bypass", relief="solid", bd=1, font=FONTE_PADRAO).pack(side="left"); self._bordered_label(row_bypass, d.get('bypass_1'), width=8).pack(side="left", padx=(0,2)); tk.Label(row_bypass, text="-", bd=0, font=FONTE_PADRAO).pack(side="left", padx=2); self._bordered_label(row_bypass, d.get('bypass_2'), width=10).pack(side="left")
+        d = self.dados_ficha
+        main_container = tk.Frame(self.scrollable_frame, padx=10, pady=10)
+        main_container.pack(fill="both", expand=True)
+
+        # --- CABEÇALHO ---
+        header_frame = tk.Frame(main_container)
+        header_frame.pack(fill='x', pady=(0, 15), anchor='w')
+
+        def create_header_cell(parent, label_text, value_text, label_width, value_width, expand=False):
+            """Helper para criar uma célula do cabeçalho com alinhamento."""
+            cell_frame = tk.Frame(parent)
+            pack_options = {'side': 'left', 'padx': (0, 5)}
+            if expand:
+                pack_options.update({'fill': 'x', 'expand': True})
+            
+            cell_frame.pack(**pack_options)
+            
+            tk.Label(cell_frame, text=label_text, relief="solid", bd=1, anchor="w", font=FONTE_PADRAO, width=label_width).pack(side="left", fill='y')
+            self._bordered_label(cell_frame, value_text, width=value_width, anchor='w').pack(side="left", fill='both', expand=True)
+
+        # --- Linha 1 ---
+        row1 = tk.Frame(header_frame); row1.pack(fill="x", pady=1, anchor='w')
+        create_header_cell(row1, "Autor:", d.get("autor"), 4, 61)
+        create_header_cell(row1, "Data:", d.get("data"), 4, 12)
+        create_header_cell(row1, "NS:", d.get("ns"), 3, 20)
+        create_header_cell(row1, "Eqpto:", d.get("eqpto"), 5, 10)
+        create_header_cell(row1, "Condição:", d.get("condição"), 8, 10)
+
+        # --- Linha 2 ---
+        row2 = tk.Frame(header_frame); row2.pack(fill="x", pady=1, anchor='w')
+        create_header_cell(row2, "Malha:", d.get("malha"), 6, 10)
+        create_header_cell(row2, "Alimentador:", d.get("alimentador"), 10, 17)
+        create_header_cell(row2, "Motivador:", d.get("motivador"), 8, 8)
+        create_header_cell(row2, "Coord:", d.get("coord"), 5, 20)
+        create_header_cell(row2, "Endereço:", d.get("endereço"), 8, 45, expand=True)
+
+        # --- Linha 3 ---
+        row3 = tk.Frame(header_frame); row3.pack(fill="x", pady=1, anchor='w')
+        create_header_cell(row3, "Mídia:", d.get("mídia"), 6, 10)
+        create_header_cell(row3, "Fabricante:", d.get("fabricante"), 10, 20)
+        create_header_cell(row3, "Modelo:", d.get("modelo"), 6, 20)
+        create_header_cell(row3, "Comando:", d.get("comando"), 8, 15)
+        create_header_cell(row3, "Telecontrolado:", d.get("telecontrolado"), 12, 5)
+        create_header_cell(row3, "Siom:", d.get("siom"), 4, 21, expand=True)
+
+        # --- Linha 4 ---
+        row4 = tk.Frame(header_frame); row4.pack(fill="x", pady=1, anchor='w')
+        create_header_cell(row4, "By-Pass:", d.get("bypass"), 6, 10)
+        create_header_cell(row4, "Manobra Efetiva:", d.get("manobra_efetiva"), 14, 5)
+        create_header_cell(row4, "Vinculado a Acessante:", d.get("vinculado_acessante"), 19, 5)
+        if d.get('vinculado_acessante') == 'Sim':
+            create_header_cell(row4, "Eqpto Acessante:", d.get('eqpto_acessante'), 14, 10, expand=True)
+
+
+        # --- NOVAS TABELAS DE PARÂMETROS ---
+        params_container = tk.Frame(main_container)
+        params_container.pack(fill='x', pady=10, anchor='w')
+        params_container.grid_columnconfigure(0, weight=1)
+        params_container.grid_columnconfigure(1, weight=1)
+        params_container.grid_columnconfigure(2, weight=1)
+        
+        col_esquerda = tk.Frame(params_container); col_esquerda.grid(row=0, column=0, sticky='new', padx=(0,10))
+        col_meio = tk.Frame(params_container); col_meio.grid(row=0, column=1, sticky='new', padx=(0,10))
+        col_direita = tk.Frame(params_container); col_direita.grid(row=0, column=2, sticky='new')
+        
+        # Tabela Coordenograma
+        f_coord = tk.Frame(col_esquerda); f_coord.pack(anchor='w')
+        self._cell(f_coord, 0, 0, "Parâmetros do Coordenograma do Cliente", cs=3)
+        self._cell(f_coord, 1, 0, ""); self._cell(f_coord, 1, 1, "Consumo"); self._cell(f_coord, 1, 2, "Injeção")
+        self._cell(f_coord, 2, 0, "Pick-up (A)"); self._cell(f_coord, 2, 1, d.get("param_consumo_pickup")); self._cell(f_coord, 2, 2, d.get("param_injecao_pickup"))
+        self._cell(f_coord, 3, 0, "Curva"); self._cell(f_coord, 3, 1, d.get("param_consumo_curva")); self._cell(f_coord, 3, 2, d.get("param_injecao_curva"))
+        self._cell(f_coord, 4, 0, "Dial"); self._cell(f_coord, 4, 1, d.get("param_consumo_dial")); self._cell(f_coord, 4, 2, d.get("param_injecao_dial"))
+        self._cell(f_coord, 5, 0, "T. Adic."); self._cell(f_coord, 5, 1, d.get("param_consumo_t_adic")); self._cell(f_coord, 5, 2, d.get("param_injecao_t_adic"))
+        self._cell(f_coord, 6, 0, "Pot. de Consumo (kW)"); self._cell(f_coord, 6, 1, d.get("param_consumo_pot_kw"), cs=2)
+        self._cell(f_coord, 7, 0, "Pot. de Injeção (kW)"); self._cell(f_coord, 7, 1, d.get("param_injecao_pot_kw"), cs=2)
+
+        # Tabela Tensão e Carga
+        f_tensao = tk.Frame(col_meio); f_tensao.pack(anchor='w', fill='x', pady=(0, 10))
+        self._cell(f_tensao, 0, 0, "Tensão [kV] da rede"); self._cell(f_tensao, 0, 1, d.get("tensao_kv_rede"))
+        self._cell(f_tensao, 1, 0, "Carga - fase A [A]"); self._cell(f_tensao, 1, 1, d.get("carga_fase_a"))
+        self._cell(f_tensao, 2, 0, "Carga - fase B [A]"); self._cell(f_tensao, 2, 1, d.get("carga_fase_b"))
+        self._cell(f_tensao, 3, 0, "Carga - fase C [A]"); self._cell(f_tensao, 3, 1, d.get("carga_fase_c"))
+
+        # Tabela Corrente de Falta
+        f_falta = tk.Frame(col_meio); f_falta.pack(anchor='w', fill='x')
+        self._cell(f_falta, 0, 0, "Corrente de Falta", cs=2)
+        self._cell(f_falta, 1, 0, "FASE - CC máximo [A]"); self._cell(f_falta, 1, 1, d.get("corrente_falta_fase_cc_max"))
+        self._cell(f_falta, 2, 0, "FASE - Sensibilidade principal [A]"); self._cell(f_falta, 2, 1, d.get("corrente_falta_fase_sens_princ"))
+        self._cell(f_falta, 3, 0, "TERRA - Sensibilidade principal [A]"); self._cell(f_falta, 3, 1, d.get("corrente_falta_terra_sens_princ"))
+
+        # Tabela Equipamento a Montante
+        f_montante = tk.Frame(col_direita); f_montante.pack(anchor='w', fill='x', pady=(0, 10))
+        self._cell(f_montante, 0, 0, ""); self._cell(f_montante, 0, 1, "Lado 1\nA montante"); self._cell(f_montante, 0, 2, "Lado 2")
+        self._cell(f_montante, 1, 0, "Número do Equipamento"); self._cell(f_montante, 1, 1, d.get("eqpto_montante_numero_l1")); self._cell(f_montante, 1, 2, d.get("eqpto_montante_numero_l2"))
+        self._cell(f_montante, 2, 0, "Pick-up Fase - G1 (A)"); self._cell(f_montante, 2, 1, d.get("eqpto_montante_pickup_fase_g1_l1")); self._cell(f_montante, 2, 2, d.get("eqpto_montante_pickup_fase_g1_l2"))
+        self._cell(f_montante, 3, 0, "Pick-up Fase - G2 (A)"); self._cell(f_montante, 3, 1, d.get("eqpto_montante_pickup_fase_g2_l1")); self._cell(f_montante, 3, 2, d.get("eqpto_montante_pickup_fase_g2_l2"))
+        self._cell(f_montante, 4, 0, "Pick-up Terra - G1 (A)"); self._cell(f_montante, 4, 1, d.get("eqpto_montante_pickup_terra_g1_l1")); self._cell(f_montante, 4, 2, d.get("eqpto_montante_pickup_terra_g1_l2"))
+        self._cell(f_montante, 5, 0, "Pick-up Terra - G2 (A)"); self._cell(f_montante, 5, 1, d.get("eqpto_montante_pickup_terra_g2_l1")); self._cell(f_montante, 5, 2, d.get("eqpto_montante_pickup_terra_g2_l2"))
+
+        # Tabela Cabo Crítico
+        f_cabo = tk.Frame(col_direita); f_cabo.pack(anchor='w', fill='x')
+        self._cell(f_cabo, 0, 0, "Cabo crítico no trecho"); self._cell(f_cabo, 0, 1, "Nominal [A]"); self._cell(f_cabo, 0, 2, "Admissível [A]")
+        self._cell(f_cabo, 1, 0, d.get("cabo_critico_trecho")); self._cell(f_cabo, 1, 1, d.get("cabo_critico_nominal")); self._cell(f_cabo, 1, 2, d.get("cabo_critico_admissivel"))
+        
+        # --- TABELAS DE GRUPO ---
+        wrap_tabelas = tk.Frame(main_container); wrap_tabelas.pack(pady=10, anchor="center")
         header = tk.Frame(wrap_tabelas, bd=1, relief="solid"); [header.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [header.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]; self._cell(header, 0, 0, "Grupo Normal = Grupo de Consumo", cs=9); self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  "); header.pack(pady=5)
         for i in range(1, 4): self._criar_tabela_grupo_visualizacao(wrap_tabelas, f"  Grupo {i}  ", i)
-        if d.get("condição") in ["Acess Inv", "Acess s/Inv"]:
+        
+        # Bloco de tabelas replicado (Inverso)
+        condicao_upper = (d.get("condição") or "").upper()
+        if condicao_upper in ["ACESS INV", "ACESS S/INV"]:
             header_rep = tk.Frame(wrap_tabelas, bd=1, relief="solid"); [header_rep.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [header_rep.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]; self._cell(header_rep, 0, 0, "Grupo Invertido = Grupo de Injeção", cs=9); self._cell(header_rep, 1, 0, "  Grupos  ", rs=2); self._cell(header_rep, 1, 1, "FASE", cs=4); self._cell(header_rep, 1, 5, "TERRA", cs=4); self._cell(header_rep, 2, 1, "  Pickup  "); self._cell(header_rep, 2, 2, "  Sequência  "); self._cell(header_rep, 2, 3, "  Curva Lenta  "); self._cell(header_rep, 2, 4, "  Curva Rápida  "); self._cell(header_rep, 2, 5, "  Pickup  "); self._cell(header_rep, 2, 6, "  Sequência  "); self._cell(header_rep, 2, 7, "  Curva Lenta  "); self._cell(header_rep, 2, 8, "  Curva Rápida  "); header_rep.pack(pady=(20, 5))
             for i in range(1, 4): self._criar_tabela_grupo_visualizacao(wrap_tabelas, f"  Grupo {i}  ", i, suffix="_rep")
-        frame_obs = tk.Frame(main_form_frame); frame_obs.pack(pady=(10, 5), padx=10, fill='x', expand=False); tk.Label(frame_obs, text="Observações:", font=FONTE_PADRAO).pack(anchor='w'); text_container = tk.Frame(frame_obs, height=120, relief="solid", bd=1); text_container.pack(fill='x', expand=False); text_container.pack_propagate(False); obs_text = tk.Text(text_container, relief="flat", bd=0, font=FONTE_PADRAO, wrap="word"); obs_text.insert("1.0", d.get("observacoes") or "Nenhuma observação."); obs_text.config(state="disabled"); obs_text.pack(fill="both", expand=True)
-        ttk.Button(main_form_frame, text="Fechar", command=self.destroy).pack(pady=20)
+        
+        # --- OBSERVAÇÕES E BOTÃO ---
+        frame_obs = tk.Frame(main_container); frame_obs.pack(pady=(10, 5), padx=10, fill='x', expand=False); tk.Label(frame_obs, text="Observações:", font=FONTE_PADRAO).pack(anchor='w'); text_container = tk.Frame(frame_obs, height=120, relief="solid", bd=1); text_container.pack(fill='x', expand=False); text_container.pack_propagate(False); obs_text = tk.Text(text_container, relief="flat", bd=0, font=FONTE_PADRAO, wrap="word"); obs_text.insert("1.0", d.get("observacoes") or "Nenhuma observação."); obs_text.config(state="disabled"); obs_text.pack(fill="both", expand=True)
+        
+        ttk.Button(main_container, text="Fechar", command=self.destroy).pack(pady=20)
+
     def _criar_tabela_grupo_visualizacao(self, parent, group_name, group_index, suffix=""):
         frame_tabela = tk.Frame(parent, bd=1, relief="solid"); [frame_tabela.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [frame_tabela.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]; d = self.dados_ficha
         self._cell(frame_tabela, 0, 0, group_name, rs=3); self._cell(frame_tabela, 0, 1, d.get(f'g{group_index}_pickup_fase{suffix}'), rs=3); self._cell(frame_tabela, 0, 2, d.get(f'g{group_index}_sequencia{suffix}'), rs=3); self._cell(frame_tabela, 0, 3, d.get(f'g{group_index}_curva_lenta_tipo{suffix}'))
