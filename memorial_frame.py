@@ -16,6 +16,7 @@ from ajustes_frame import ObsWindow
 
 FONTE_PADRAO = ("Times New Roman", 12)
 FONTE_PEQUENA = ("Times New Roman", 10)
+FONTE_MUITO_PEQUENA = ("Times New Roman", 8)
 SIDEBAR_WIDTH = 450
 
 class MapSelectDialog(simpledialog.Dialog):
@@ -637,6 +638,7 @@ class MemorialCalculoFrame(tk.Frame):
             t, v = self.criar_tabela_grupo_secc(parent, f"  Grupo {i}  ")
             vars_storage[f'grupo_{i}'] = v
             tables_storage.append(t)
+        self.criar_tabela_grupo4(parent, tables_storage)
 
     def criar_tabela_grupo4(self, parent, tables_storage):
         f = tk.Frame(parent, bd=1, relief="solid")
@@ -689,14 +691,12 @@ class MemorialCalculoFrame(tk.Frame):
 
         # Lógica para Tabela Normal vs Seccionalizador
         if cond in ["SECC NA", "SECC NF"]:
-            # Esconde Normal e mostra SECC
             self.wrap_tabelas.grid_forget()
             [var.set("") for g in self.vars_grupos.values() for var in g.values()]
             
             self.frame_bloco_tabelas_secc.grid(row=0, column=0, sticky="nsew")
             self._set_widgets_state(self.frame_bloco_tabelas_secc, 'normal')
         else:
-            # Esconde SECC e mostra Normal
             self.frame_bloco_tabelas_secc.grid_forget()
             [var.set("") for g in self.vars_grupos_secc.values() for var in g.values()]
             
@@ -729,11 +729,14 @@ class MemorialCalculoFrame(tk.Frame):
         widget.after(10, lambda: widget.event_generate('<Down>'))
 
     def _cell(self, frame, r, c, txt="", rs=1, cs=1, sticky="nsew", font=None):
-        outer = tk.Frame(frame, relief="solid", bd=1, bg='white'); outer.grid(row=r, column=c, rowspan=rs, columnspan=cs, sticky=sticky)
+        outer = tk.Frame(frame, relief="solid", bd=1, bg='white')
+        outer.grid(row=r, column=c, rowspan=rs, columnspan=cs, sticky=sticky)
         if txt is not None:
             font_to_use = font if font else FONTE_PADRAO
-            tk.Label(outer, text=txt, font=font_to_use, bg='white').pack(fill="both", expand=True)
+            lbl = tk.Label(outer, text=txt, font=font_to_use, bg='white', justify='center')
+            lbl.pack(fill="both", expand=True)
         return outer
+
     def _limitar_tamanho(self, P, max_len_str): return len(P) <= int(max_len_str)
     def formatar_siom(self, *args):
         var = self.campos_dict["Siom"]; var.trace_remove("write", var.trace_info()[0][1]); valor = ''.join(filter(str.isdigit, var.get()))[:7]; var.set(f"{valor[:5]}-{valor[5:]}" if len(valor) > 5 else valor); var.trace_add("write", self.formatar_siom)
@@ -797,16 +800,16 @@ class MemorialCalculoFrame(tk.Frame):
         cell_seq = tk.Frame(frame_tabela, relief="solid", bd=1, bg='white'); cell_seq.grid_propagate(False); cell_seq.grid(row=0, column=2, rowspan=3, sticky="nsew")
         combo_seq = ttk.Combobox(cell_seq, textvariable=group_vars["sequencia"], values=["", "1L", "2L", "3L"], state="readonly", font=FONTE_PADRAO, justify="center", width=8, style='Arrowless.TCombobox'); combo_seq.bind("<Button-1>", self.open_dropdown_on_click); combo_seq.pack(fill="both", expand=True)
 
-        self._cell(frame_tabela, 0, 3, "SECCIONALIZADOR", font=FONTE_PEQUENA)
+        self._cell(frame_tabela, 0, 3, "SECCIONALIZADOR", font=FONTE_MUITO_PEQUENA)
         sub_lenta = tk.Frame(frame_tabela, bd=0, bg='white'); sub_lenta.grid_propagate(False); sub_lenta.grid(row=1, column=3, rowspan=2, sticky="nsew"); [sub_lenta.grid_rowconfigure(r, weight=1) for r in range(2)]; [sub_lenta.grid_columnconfigure(c, weight=1) for c in range(2)] 
-        tk.Label(sub_lenta, text="Dial", font=FONTE_PEQUENA, relief="solid", bd=1, bg='white').grid(row=0, column=0, sticky="nsew")
-        tk.Label(sub_lenta, text="T. Adic.", font=FONTE_PEQUENA, relief="solid", bd=1, bg='white').grid(row=0, column=1, sticky="nsew")
+        tk.Label(sub_lenta, text="Dial", font=FONTE_PADRAO, relief="solid", bd=1, bg='white').grid(row=0, column=0, sticky="nsew")
+        tk.Label(sub_lenta, text="T. Adic.", font=FONTE_PADRAO, relief="solid", bd=1, bg='white').grid(row=0, column=1, sticky="nsew")
         self._cell(sub_lenta, 1, 0, ""); self._cell(sub_lenta, 1, 1, "")
 
         self._cell(frame_tabela, 0, 4, "")
         sub_rapida = tk.Frame(frame_tabela, bd=0, bg='white'); sub_rapida.grid_propagate(False); sub_rapida.grid(row=1, column=4, rowspan=2, sticky="nsew"); [sub_rapida.grid_rowconfigure(r, weight=1) for r in range(2)]; [sub_rapida.grid_columnconfigure(c, weight=1) for c in range(2)]
-        tk.Label(sub_rapida, text="Dial", font=FONTE_PEQUENA, relief="solid", bd=1, bg='white').grid(row=0, column=0, sticky="nsew")
-        tk.Label(sub_rapida, text="T. Adic.", font=FONTE_PEQUENA, relief="solid", bd=1, bg='white').grid(row=0, column=1, sticky="nsew")
+        tk.Label(sub_rapida, text="Dial", font=FONTE_PADRAO, relief="solid", bd=1, bg='white').grid(row=0, column=0, sticky="nsew")
+        tk.Label(sub_rapida, text="T. Adic.", font=FONTE_PADRAO, relief="solid", bd=1, bg='white').grid(row=0, column=1, sticky="nsew")
         self._cell(sub_rapida, 1, 0, ""); self._cell(sub_rapida, 1, 1, "")
 
         tk.Entry(frame_tabela, textvariable=group_vars["pickup_terra"], font=FONTE_PADRAO, width=4, relief="solid", bd=1, justify="center", validate="key", validatecommand=(self.vcmd_4, "%P")).grid(row=0, column=5, rowspan=3, sticky="nsew")
@@ -814,7 +817,7 @@ class MemorialCalculoFrame(tk.Frame):
         cell_seq_terra = tk.Frame(frame_tabela, relief="solid", bd=1, bg='white'); cell_seq_terra.grid_propagate(False); cell_seq_terra.grid(row=0, column=6, rowspan=3, sticky="nsew")
         tk.Label(cell_seq_terra, textvariable=group_vars["sequencia_terra"], font=FONTE_PADRAO, justify="center", bg='white').pack(fill="both", expand=True)
         
-        self._cell(frame_tabela, 0, 7, "SECCIONALIZADOR", font=FONTE_PEQUENA)
+        self._cell(frame_tabela, 0, 7, "SECCIONALIZADOR", font=FONTE_MUITO_PEQUENA)
         self._cell(frame_tabela, 1, 7, "Tempo (s)"); self._cell(frame_tabela, 2, 7, "")
 
         self._cell(frame_tabela, 0, 8, ""); self._cell(frame_tabela, 1, 8, "Tempo (s)"); self._cell(frame_tabela, 2, 8, "")
