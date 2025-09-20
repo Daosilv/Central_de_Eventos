@@ -28,7 +28,6 @@ class DetalhesWindow(tk.Toplevel):
 
         self.title("Visualização de Parâmetros")
         self.geometry("1200x900")
-        self.grab_set()
         self.resizable(True, True)
         
         self.controller.center_window(self)
