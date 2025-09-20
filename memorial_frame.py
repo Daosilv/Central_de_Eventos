@@ -224,6 +224,7 @@ class MemorialCalculoFrame(tk.Frame):
         self.campos_dict = { 
             "Autor": tk.StringVar(), "Eqpto": tk.StringVar(), "Malha": tk.StringVar(), 
             "Condição": tk.StringVar(), "Motivador": tk.StringVar(), "Alimentador": tk.StringVar(), 
+            "Alimentador_2": tk.StringVar(),
             "NS": tk.StringVar(), "Siom": tk.StringVar(), "Data": tk.StringVar(value=datetime.now().strftime('%d/%m/%Y')), 
             "Coord": tk.StringVar(), "Endereço": tk.StringVar(), "Mídia": tk.StringVar(), 
             "Fabricante": tk.StringVar(), "Modelo": tk.StringVar(), "Comando": tk.StringVar(), 
@@ -372,7 +373,8 @@ class MemorialCalculoFrame(tk.Frame):
 
         row2_frame = tk.Frame(frame_campos, bg='white'); row2_frame.grid(row=1, column=0, sticky="ew", pady=(0, 2))
         self._criar_celula_cabecalho(row2_frame, "Malha:", self.campos_dict["Malha"], AutocompleteCombobox, {}, 6, 10, categoria_db='malha', tipo_lista='geral')
-        self._criar_celula_cabecalho(row2_frame, "Alimentador:", self.campos_dict["Alimentador"], AutocompleteCombobox, {}, 10, 28, categoria_db='alimentador', tipo_lista='geral')
+        self._criar_celula_cabecalho(row2_frame, "Alimentador:", self.campos_dict["Alimentador"], AutocompleteCombobox, {}, 10, 14, categoria_db='alimentador', tipo_lista='geral')
+        self._criar_celula_cabecalho(row2_frame, "", self.campos_dict["Alimentador_2"], AutocompleteCombobox, {}, 0, 14, categoria_db='alimentador', tipo_lista='geral', nome_widget='alimentador_2')
         self._criar_celula_cabecalho(row2_frame, "Coord:", self.campos_dict["Coord"], tk.Entry, {}, 5, 20)
         self._criar_celula_cabecalho(row2_frame, "Endereço:", self.campos_dict["Endereço"], tk.Entry, {}, 8, 45, expand=True)
 
@@ -445,8 +447,12 @@ class MemorialCalculoFrame(tk.Frame):
         self.controller.atualizar_listas_memorial(self)
         
         for categoria, combobox in self.comboboxes_cabecalho.items():
-            if categoria not in ['fabricante', 'modelo', 'comando', 'cabo_critico_trecho']:
-                opcoes = self._get_opcoes_formatadas_geral(categoria)
+            effective_categoria = categoria
+            if categoria == 'alimentador_2':
+                effective_categoria = 'alimentador'
+
+            if effective_categoria not in ['fabricante', 'modelo', 'comando', 'cabo_critico_trecho']:
+                opcoes = self._get_opcoes_formatadas_geral(effective_categoria)
                 if "" not in opcoes:
                     opcoes.insert(0, "")
                 if isinstance(combobox, AutocompleteCombobox):
