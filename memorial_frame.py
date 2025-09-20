@@ -372,8 +372,7 @@ class MemorialCalculoFrame(tk.Frame):
 
         row2_frame = tk.Frame(frame_campos, bg='white'); row2_frame.grid(row=1, column=0, sticky="ew", pady=(0, 2))
         self._criar_celula_cabecalho(row2_frame, "Malha:", self.campos_dict["Malha"], AutocompleteCombobox, {}, 6, 10, categoria_db='malha', tipo_lista='geral')
-        self._criar_celula_cabecalho(row2_frame, "Alimentador:", self.campos_dict["Alimentador"], AutocompleteCombobox, {}, 10, 17, categoria_db='alimentador', tipo_lista='geral')
-        self._criar_celula_cabecalho(row2_frame, "Motivador:", self.campos_dict["Motivador"], AutocompleteCombobox, {}, 8, 8, categoria_db='motivador', tipo_lista='geral')
+        self._criar_celula_cabecalho(row2_frame, "Alimentador:", self.campos_dict["Alimentador"], AutocompleteCombobox, {}, 10, 28, categoria_db='alimentador', tipo_lista='geral')
         self._criar_celula_cabecalho(row2_frame, "Coord:", self.campos_dict["Coord"], tk.Entry, {}, 5, 20)
         self._criar_celula_cabecalho(row2_frame, "Endereço:", self.campos_dict["Endereço"], tk.Entry, {}, 8, 45, expand=True)
 
@@ -389,6 +388,7 @@ class MemorialCalculoFrame(tk.Frame):
         self._criar_celula_cabecalho(row4_frame, "By-Pass:", self.campos_dict["Bypass"], ttk.Combobox, {'state': 'readonly'}, 6, 10, categoria_db='bypass', tipo_lista='geral')
         self._criar_celula_cabecalho(row4_frame, "Manobra Efetiva:", self.campos_dict["Manobra Efetiva"], AutocompleteCombobox, {}, 14, 5, categoria_db='manobra_efetiva', tipo_lista='geral')
         self._criar_celula_cabecalho(row4_frame, "Vinculado a Acessante:", self.campos_dict["Vinculado a Acessante"], AutocompleteCombobox, {}, 19, 5, categoria_db='vinculado_acessante', tipo_lista='geral')
+        self._criar_celula_cabecalho(row4_frame, "Motivador:", self.campos_dict["Motivador"], AutocompleteCombobox, {}, 8, 8, categoria_db='motivador', tipo_lista='geral')
         self.frame_acessante = self._criar_celula_cabecalho(row4_frame, "Eqpto Acessante:", self.campos_dict["Eqpto Acessante"], tk.Entry, {}, 14, 10, expand=True)
 
     def _criar_celula_cabecalho(self, parent, label_text, var, widget_class, widget_options, label_width, entry_width, categoria_db=None, tipo_lista=None, nome_widget=None, expand=False):
