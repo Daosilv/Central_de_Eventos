@@ -143,14 +143,13 @@ class AutocompleteCombobox(ttk.Combobox):
         self._completion_list = []
         self.set_completion_list([])
         self.bind('<KeyRelease>', self._on_keyrelease)
-        self.bind('<FocusOut>', self._on_focus_out)
 
     def set_completion_list(self, completion_list):
         self._completion_list = sorted(list(set(completion_list)))
         self['values'] = self._completion_list
     
     def _on_keyrelease(self, event):
-        value = self.get().lower()
+        value = self.get()
         
         if event.keysym in ("BackSpace", "Delete", "Left", "Right", "Home", "End"):
             pass
@@ -161,22 +160,15 @@ class AutocompleteCombobox(ttk.Combobox):
         else:
             data = []
             for item in self._completion_list:
-                if item.lower().startswith(value):
+                if item.lower().startswith(value.lower()):
                     data.append(item)
             
             if self['values'] != tuple(data):
                 self['values'] = data
         
         if self.get() and self['values']:
-             self.event_generate('<Down>')
-
-    def _on_focus_out(self, event):
-        current_value = self.get()
-        if current_value and self['values'] and current_value not in self['values']:
-            if self['values'] and self['values'][0].lower().startswith(current_value.lower()):
-                self.set(self['values'][0])
-            else:
-                self.set('')
+            self.tk.eval('ttk::combobox::Post {w}'.format(w=self))
+            self.set(value)
 
 class MemorialCalculoFrame(tk.Frame):
     def __init__(self, parent, controller):
@@ -415,7 +407,6 @@ class MemorialCalculoFrame(tk.Frame):
 
         if issubclass(widget_class, ttk.Combobox):
             widget = widget_class(widget_container, **options)
-            widget.bind("<Button-1>", self.open_dropdown_on_click)
 
             if tipo_lista == 'geral' and categoria_db:
                 opcoes = [""] + self._get_opcoes_formatadas_geral(categoria_db)
@@ -433,9 +424,6 @@ class MemorialCalculoFrame(tk.Frame):
             elif categoria_db:
                 self.comboboxes_cabecalho[categoria_db] = widget
         else: 
-            validate_cmd = (self.vcmd_limite, '%P', str(entry_width))
-            options['validate'] = 'key'
-            options['validatecommand'] = validate_cmd
             widget = widget_class(widget_container, **options)
         
         widget.config(width=entry_width)
