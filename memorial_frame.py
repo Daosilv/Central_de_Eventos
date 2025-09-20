@@ -533,15 +533,12 @@ class MemorialCalculoFrame(tk.Frame):
         self._criar_novas_tabelas_parametros(self.main_form_frame)
         frame_anexos = tk.Frame(self.main_form_frame, bg='white'); frame_anexos.pack(pady=(15, 5), padx=10, anchor='w'); btn_anexos = tk.Button(frame_anexos, text="+", font=("Helvetica", 10, "bold"), relief="solid", bd=1, command=self.abrir_anexos, cursor="hand2"); btn_anexos.pack(side="left", padx=(0, 5)); lbl_anexos = tk.Label(frame_anexos, text="Anexos", font=FONTE_PADRAO, bg='white'); lbl_anexos.pack(side="left")
         
-        # Container para as tabelas que irão alternar
         self.tabela_principal_container = tk.Frame(self.main_form_frame, bg='white')
         self.tabela_principal_container.pack(pady=10, anchor="center")
 
-        # Bloco de Tabelas Normal (criado dentro do container, mas não posicionado)
         self.wrap_tabelas = tk.Frame(self.tabela_principal_container, bg='white')
         self._construir_bloco_tabelas(self.wrap_tabelas, self.vars_grupos, self.tabelas_grupo_frames, self.ref_cells, "original")
         
-        # Bloco de Tabelas Seccionalizador (criado dentro do container, mas não posicionado)
         self.frame_bloco_tabelas_secc = tk.Frame(self.tabela_principal_container, bg='white')
         self._construir_bloco_tabelas_secc(
             self.frame_bloco_tabelas_secc,
@@ -558,7 +555,6 @@ class MemorialCalculoFrame(tk.Frame):
         
         frame_obs = tk.Frame(self.main_form_frame, bg='white'); frame_obs.pack(pady=(10, 5), padx=10, fill='x', expand=False); lbl_obs = tk.Label(frame_obs, text="Observações:", font=FONTE_PADRAO, bg='white'); lbl_obs.pack(anchor='w'); text_container = tk.Frame(frame_obs, height=120, relief="solid", bd=1); text_container.pack(fill='x', expand=False); text_container.pack_propagate(False); self.text_obs = tk.Text(text_container, relief="flat", bd=0, font=FONTE_PADRAO); self.text_obs.pack(fill="both", expand=True)
         
-        # Bloco de Tabelas Inverso
         self.frame_bloco_tabelas_replicado = tk.Frame(self.main_form_frame, bg='white')
         self.frame_bloco_tabelas_replicado.pack(pady=(20, 10), anchor="center")
         self._construir_bloco_tabelas(self.frame_bloco_tabelas_replicado, self.vars_grupos_rep, self.tabelas_grupo_frames_rep, self.ref_cells_rep, "replicado")
@@ -802,14 +798,14 @@ class MemorialCalculoFrame(tk.Frame):
 
         self._cell(frame_tabela, 0, 3, "SECCIONALIZADOR", font=FONTE_MUITO_PEQUENA)
         sub_lenta = tk.Frame(frame_tabela, bd=0, bg='white'); sub_lenta.grid_propagate(False); sub_lenta.grid(row=1, column=3, rowspan=2, sticky="nsew"); [sub_lenta.grid_rowconfigure(r, weight=1) for r in range(2)]; [sub_lenta.grid_columnconfigure(c, weight=1) for c in range(2)] 
-        tk.Label(sub_lenta, text="Dial", font=FONTE_PADRAO, relief="solid", bd=1, bg='white').grid(row=0, column=0, sticky="nsew")
-        tk.Label(sub_lenta, text="T. Adic.", font=FONTE_PADRAO, relief="solid", bd=1, bg='white').grid(row=0, column=1, sticky="nsew")
+        tk.Label(sub_lenta, text="Dial", font=FONTE_PADRAO, width=6, relief="solid", bd=1, bg='white').grid(row=0, column=0, sticky="nsew")
+        tk.Label(sub_lenta, text="T. Adic.", font=FONTE_PADRAO, width=6, relief="solid", bd=1, bg='white').grid(row=0, column=1, sticky="nsew")
         self._cell(sub_lenta, 1, 0, ""); self._cell(sub_lenta, 1, 1, "")
 
         self._cell(frame_tabela, 0, 4, "")
         sub_rapida = tk.Frame(frame_tabela, bd=0, bg='white'); sub_rapida.grid_propagate(False); sub_rapida.grid(row=1, column=4, rowspan=2, sticky="nsew"); [sub_rapida.grid_rowconfigure(r, weight=1) for r in range(2)]; [sub_rapida.grid_columnconfigure(c, weight=1) for c in range(2)]
-        tk.Label(sub_rapida, text="Dial", font=FONTE_PADRAO, relief="solid", bd=1, bg='white').grid(row=0, column=0, sticky="nsew")
-        tk.Label(sub_rapida, text="T. Adic.", font=FONTE_PADRAO, relief="solid", bd=1, bg='white').grid(row=0, column=1, sticky="nsew")
+        tk.Label(sub_rapida, text="Dial", font=FONTE_PADRAO, width=6, relief="solid", bd=1, bg='white').grid(row=0, column=0, sticky="nsew")
+        tk.Label(sub_rapida, text="T. Adic.", font=FONTE_PADRAO, width=6, relief="solid", bd=1, bg='white').grid(row=0, column=1, sticky="nsew")
         self._cell(sub_rapida, 1, 0, ""); self._cell(sub_rapida, 1, 1, "")
 
         tk.Entry(frame_tabela, textvariable=group_vars["pickup_terra"], font=FONTE_PADRAO, width=4, relief="solid", bd=1, justify="center", validate="key", validatecommand=(self.vcmd_4, "%P")).grid(row=0, column=5, rowspan=3, sticky="nsew")
