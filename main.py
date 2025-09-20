@@ -8,6 +8,8 @@ from datetime import datetime
 import openpyxl
 import traceback
 import time
+import queue
+import threading
 
 try:
     from PIL import Image, ImageTk
@@ -220,8 +222,47 @@ class App(tk.Tk):
             wait_window.update()
             return wait_window
 
-        template_dir = r'C:\Plemt\Diretório Excel Padrão'
-        save_dir = r'C:\Plemt\Diretório Excel Final'
+        def worker(q, template_path, save_path, mapeamento, data):
+            try:
+                workbook = openpyxl.load_workbook(template_path, keep_vba=True)
+                
+                campo_condicao = 'condição'
+                if campo_condicao in mapeamento:
+                    aba, celula = mapeamento.pop(campo_condicao)
+                    if aba in workbook.sheetnames:
+                        sheet = workbook[aba]
+                        valor = data.get(campo_condicao, "")
+                        sheet[celula] = valor
+                
+                campos_cabecalho_processados = []
+                for campo, (aba, celula) in list(mapeamento.items()):
+                    if not campo.startswith(('g1_', 'g2_', 'g3_')):
+                        if aba in workbook.sheetnames:
+                            sheet = workbook[aba]
+                            valor = data.get(campo, "")
+                            sheet[celula] = valor
+                        campos_cabecalho_processados.append(campo)
+                
+                for campo in campos_cabecalho_processados:
+                    mapeamento.pop(campo)
+                    
+                for campo, (aba, celula) in mapeamento.items():
+                    if aba in workbook.sheetnames:
+                        sheet = workbook[aba]
+                        valor = data.get(campo, "")
+                        sheet[celula] = valor
+
+                workbook.save(save_path)
+                q.put({'status': 'success', 'path': save_path})
+
+            except FileNotFoundError:
+                q.put({'status': 'error', 'type': 'FileNotFound', 'path': template_path})
+            except Exception as e:
+                error_details = traceback.format_exc()
+                q.put({'status': 'error', 'type': 'Exception', 'error': e, 'details': error_details})
+
+        template_dir = r'C:\Central_de_Eventos\Diretório Excel Padrão'
+        save_dir = r'C:\Central_de_Eventos\Diretório Excel Final'
         template_filename = 'Planilha_MonoTrifasico_vs35_REDE.xlsm'
         template_path = os.path.join(template_dir, template_filename)
 
@@ -248,91 +289,28 @@ class App(tk.Tk):
         new_filename = f"{eqpto}_{data_str}_MC.xlsm"
         save_path = os.path.join(save_dir, new_filename)
 
-        try:
-            loading_win = show_wait_window(self, view.parent_window, "Abrindo planilha padrão em segundo plano...")
-            workbook = openpyxl.load_workbook(template_path, keep_vba=True)
-            loading_win.destroy()
-            
-            wait_win = show_wait_window(self, view.parent_window, "Aguardando 5 segundos...")
-            time.sleep(5)
-            wait_win.destroy()
+        loading_win = show_wait_window(self, view.parent_window, "Gerando planilha...")
+        
+        q = queue.Queue()
+        thread = threading.Thread(target=worker, args=(q, template_path, save_path, mapeamento, data))
+        thread.start()
 
-            campo_condicao = 'condição'
-            if campo_condicao in mapeamento:
-                aba, celula = mapeamento.pop(campo_condicao)
-                if aba in workbook.sheetnames:
-                    sheet = workbook[aba]
-                    valor = data.get(campo_condicao, "")
-                    sheet[celula] = valor
-            
-            wait_win = show_wait_window(self, view.parent_window, "Preenchendo Condição... Aguardando 10 segundos.")
-            time.sleep(10)
-            wait_win.destroy()
-            
-            campos_cabecalho_processados = []
-            for campo, (aba, celula) in mapeamento.items():
-                if not campo.startswith(('g1_', 'g2_', 'g3_')):
-                    if aba in workbook.sheetnames:
-                        sheet = workbook[aba]
-                        valor = data.get(campo, "")
-                        sheet[celula] = valor
-                    campos_cabecalho_processados.append(campo)
-            
-            for campo in campos_cabecalho_processados:
-                mapeamento.pop(campo)
-                
-            wait_win = show_wait_window(self, view.parent_window, "Preenchendo Cabeçalho... Aguardando 10 segundos.")
-            time.sleep(10)
-            wait_win.destroy()
-
-            for campo, (aba, celula) in mapeamento.items():
-                if aba in workbook.sheetnames:
-                    sheet = workbook[aba]
-                    valor = data.get(campo, "")
-                    sheet[celula] = valor
-
-            workbook.save(save_path)
-            
-            pdf_save_path = ""
-            sumario_sheet_name = 'Sumário'
-            if sumario_sheet_name in workbook.sheetnames:
-                excel_app = None
-                try:
-                    pdf_filename = f"{eqpto}_{data_str}_Sumario.pdf"
-                    pdf_save_path = os.path.join(save_dir, pdf_filename)
-                    
-                    excel_app = win32.Dispatch('Excel.Application')
-                    excel_app.Visible = False
-                    
-                    wb = excel_app.Workbooks.Open(os.path.abspath(save_path))
-                    
-                    ws = wb.Worksheets[sumario_sheet_name]
-                    ws.ExportAsFixedFormat(0, os.path.abspath(pdf_save_path))
-                    
-                    wb.Close(SaveChanges=False)
-                except Exception as pdf_error:
-                    messagebox.showerror("Erro ao Gerar PDF", f"Ocorreu um erro ao gerar o PDF da aba Sumário:\n{pdf_error}", parent=view.parent_window)
-                    pdf_save_path = ""
-                finally:
-                    if excel_app:
-                        excel_app.Quit()
-            
-            if pdf_save_path:
-                messagebox.showinfo("Sucesso", f"Planilha principal salva em:\n{save_path}\n\nPDF do Sumário salvo em:\n{pdf_save_path}", parent=view.parent_window)
-            else:
-                messagebox.showinfo("Sucesso", f"Planilha principal salva em:\n{save_path}\n\nAba 'Sumário' não encontrada para exportar como PDF.", parent=view.parent_window)
-
+        def check_queue():
             try:
-                os.startfile(save_path)
-            except Exception:
-                messagebox.showwarning("Aviso", f"Não foi possível abrir a planilha principal automaticamente.", parent=view.parent_window)
+                result = q.get_nowait()
+                loading_win.destroy()
+                if result['status'] == 'success':
+                    messagebox.showinfo("Sucesso", f"Planilha salva em:\n{result['path']}", parent=view.parent_window)
+                else:
+                    if result['type'] == 'FileNotFound':
+                        messagebox.showerror("Erro", f"O template da planilha não foi encontrado em:\n{result['path']}", parent=view.parent_window)
+                    else:
+                        messagebox.showerror("Erro Inesperado", f"Ocorreu um erro ao gerar a planilha:\n{result['error']}\n\nDetalhes:\n{result['details']}", parent=view.parent_window)
+            except queue.Empty:
+                view.parent_window.after(100, check_queue)
 
-        except FileNotFoundError:
-            messagebox.showerror("Erro", f"O template da planilha não foi encontrado em:\n{template_path}", parent=view.parent_window)
-        except Exception as e:
-            error_details = traceback.format_exc()
-            messagebox.showerror("Erro Inesperado", f"Ocorreu um erro ao gerar a planilha:\n{e}\n\nDetalhes:\n{error_details}", parent=view.parent_window)
-            
+        view.parent_window.after(100, check_queue)
+        
     def carregar_ficha_pelo_nome(self, view, eqpto_or_id, tabela, by_id=False):
         record_id = None
         if by_id:
