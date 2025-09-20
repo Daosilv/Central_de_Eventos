@@ -62,8 +62,15 @@ class DetalhesWindow(tk.Toplevel):
     def _unbind_mouse_wheel(self, event):
         self.canvas.unbind_all("<MouseWheel>")
 
+    def _sanitize(self, text):
+        """Converte None e a string 'none' para uma string vazia."""
+        if text is None or str(text).lower() == 'none':
+            return ""
+        return text
+
     def _bordered_label(self, parent, text, width=None, anchor="w", **kwargs):
-        label = tk.Label(parent, text=text or " ", font=FONTE_PADRAO, anchor=anchor, justify="left", relief="solid", bd=1, **kwargs)
+        safe_text = self._sanitize(text)
+        label = tk.Label(parent, text=safe_text or " ", font=FONTE_PADRAO, anchor=anchor, justify="left", relief="solid", bd=1, **kwargs)
         if width:
             label.config(width=width)
         return label
@@ -72,8 +79,8 @@ class DetalhesWindow(tk.Toplevel):
         outer = tk.Frame(frame, relief="solid", bd=1)
         outer.grid(row=r, column=c, rowspan=rs, columnspan=cs, sticky=sticky)
         outer.pack_propagate(False)
-        # --- CORREÇÃO APLICADA: removido wraplength=110 ---
-        lbl = tk.Label(outer, text=txt if txt is not None else "", font=FONTE_PADRAO)
+        safe_txt = self._sanitize(txt)
+        lbl = tk.Label(outer, text=safe_txt, font=FONTE_PADRAO)
         lbl.pack(fill="both", expand=True, padx=2, pady=2)
         return outer
 
@@ -197,8 +204,8 @@ class DetalhesWindow(tk.Toplevel):
 
         tk.Label(sub_lenta, text="Dial", font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=0, column=0, sticky="nsew")
         tk.Label(sub_lenta, text="T. Adic.", font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=0, column=1, sticky="nsew")
-        tk.Label(sub_lenta, text=d.get(f'g{group_index}_curva_lenta_dial{suffix}'), font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=1, column=0, sticky="nsew")
-        tk.Label(sub_lenta, text=d.get(f'g{group_index}_curva_lenta_tadic{suffix}'), font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=1, column=1, sticky="nsew")
+        tk.Label(sub_lenta, text=self._sanitize(d.get(f'g{group_index}_curva_lenta_dial{suffix}')), font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=1, column=0, sticky="nsew")
+        tk.Label(sub_lenta, text=self._sanitize(d.get(f'g{group_index}_curva_lenta_tadic{suffix}')), font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=1, column=1, sticky="nsew")
         
         self._cell(frame_tabela, 0, 4, "IEC Inversa")
         
@@ -212,8 +219,8 @@ class DetalhesWindow(tk.Toplevel):
 
         tk.Label(sub_rapida, text="Dial", font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=0, column=0, sticky="nsew")
         tk.Label(sub_rapida, text="T. Adic.", font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=0, column=1, sticky="nsew")
-        tk.Label(sub_rapida, text=d.get(f'g{group_index}_curva_rapida_dial{suffix}'), font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=1, column=0, sticky="nsew")
-        tk.Label(sub_rapida, text=d.get(f'g{group_index}_curva_rapida_tadic{suffix}'), font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=1, column=1, sticky="nsew")
+        tk.Label(sub_rapida, text=self._sanitize(d.get(f'g{group_index}_curva_rapida_dial{suffix}')), font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=1, column=0, sticky="nsew")
+        tk.Label(sub_rapida, text=self._sanitize(d.get(f'g{group_index}_curva_rapida_tadic{suffix}')), font=FONTE_PEQUENA, relief="solid", bd=1).grid(row=1, column=1, sticky="nsew")
         
         self._cell(frame_tabela, 0, 5, d.get(f'g{group_index}_pickup_terra{suffix}'), rs=3); self._cell(frame_tabela, 0, 6, d.get(f'g{group_index}_sequencia_terra{suffix}'), rs=3)
         self._cell(frame_tabela, 0, 7, "T. Definido"); self._cell(frame_tabela, 1, 7, "Tempo (s)"); self._cell(frame_tabela, 2, 7, d.get(f'g{group_index}_terra_tempo_lenta{suffix}'))
