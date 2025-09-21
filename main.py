@@ -449,24 +449,43 @@ class MenuFrame(tk.Frame):
     def __init__(self, parent, controller, logo=None):
         super().__init__(parent)
         self.controller = controller
-        self.configure(bg="#f0f0f0")
         
-        title_frame = tk.Frame(self, bg="#e0e0e0", relief="raised", bd=2)
-        title_frame.pack(side="top", fill="x", pady=10)
+        # Cores do novo design
+        cor_fundo_principal = "#0d1b2a"  # Azul escuro
+        cor_fundo_botao = "#a7c957"      # Verde claro
+        cor_borda_botao = "#386641"      # Verde escuro
+        cor_texto_botao = "#ffffff"      # Branco
+        cor_botao_hover = "#c2e08a"      # Verde mais claro para hover
+
+        self.configure(bg=cor_fundo_principal)
+        
+        title_frame = tk.Frame(self, bg=cor_fundo_principal, relief="raised", bd=0)
+        title_frame.pack(side="top", fill="x", pady=20)
         
         if logo:
-            logo_label = tk.Label(title_frame, image=logo, bg="#e0e0e0")
+            logo_label = tk.Label(title_frame, image=logo, bg=cor_fundo_principal)
             logo_label.pack(pady=10)
         else:
             fallback_text = "Plemt - Plataforma de Estudos de Média Tensão"
-            lbl_title = tk.Label(title_frame, text=fallback_text, font=FONTE_TITULO, bg="#e0e0e0", fg="#2a753a", pady=20)
+            lbl_title = tk.Label(title_frame, text=fallback_text, font=FONTE_TITULO, bg=cor_fundo_principal, fg="#a7c957", pady=20)
             lbl_title.pack()
         
-        buttons_frame = tk.Frame(self, bg="#f0f0f0")
+        buttons_frame = tk.Frame(self, bg=cor_fundo_principal)
         buttons_frame.pack(expand=True)
         
         style = ttk.Style()
-        style.configure("Menu.TButton", font=FONTE_BOTAO_MENU, padding=20)
+        style.configure("Menu.TButton", 
+                        font=FONTE_BOTAO_MENU, 
+                        padding=20, 
+                        background=cor_fundo_botao, 
+                        foreground=cor_texto_botao,
+                        borderwidth=2,
+                        bordercolor=cor_borda_botao,
+                        relief="raised")
+        
+        style.map("Menu.TButton",
+                  background=[('active', cor_botao_hover)],
+                  relief=[('pressed', 'sunken')])
         
         ttk.Button(buttons_frame, text="Visualização", style="Menu.TButton", command=self.controller.abrir_modulo_visualizacao).grid(row=0, column=0, padx=20, pady=20)
         ttk.Button(buttons_frame, text="Memorial de Cálculo", style="Menu.TButton", command=self.controller.abrir_modulo_memorial).grid(row=0, column=1, padx=20, pady=20)

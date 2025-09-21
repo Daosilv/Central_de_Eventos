@@ -92,6 +92,11 @@ class AjustesFrame(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         self.parent_window = parent
+
+        # Cores do novo design
+        self.cor_fundo_principal = "#0d1b2a"  # Azul escuro
+        self.configure(bg=self.cor_fundo_principal)
+
         self.linhas_widgets = {}
         self.logo_photo = None
         
@@ -117,10 +122,10 @@ class AjustesFrame(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=0)
 
-        main_content_frame = tk.Frame(self)
+        main_content_frame = tk.Frame(self, bg=self.cor_fundo_principal)
         main_content_frame.grid(row=0, column=0, sticky="nsew", padx=(10,0))
         
-        frame_superior = tk.Frame(main_content_frame)
+        frame_superior = tk.Frame(main_content_frame, bg=self.cor_fundo_principal)
         frame_superior.pack(fill='x', padx=10, pady=10)
 
         try:
@@ -138,7 +143,7 @@ class AjustesFrame(tk.Frame):
             
             self.logo_photo = ImageTk.PhotoImage(resized_image)
             
-            logo_label = tk.Label(frame_superior, image=self.logo_photo)
+            logo_label = tk.Label(frame_superior, image=self.logo_photo, bg=self.cor_fundo_principal)
             logo_label.pack()
         except Exception as e:
             print(f"Aviso: Não foi possível carregar o logo no módulo de Ajustes. Erro: {e}")

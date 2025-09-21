@@ -282,6 +282,11 @@ class VisualizacaoFrame(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
+
+        # Cores do novo design
+        self.cor_fundo_principal = "#0d1b2a"  # Azul escuro
+        self.configure(bg=self.cor_fundo_principal)
+
         self.filtro_eqpto = tk.StringVar(); self.filtro_malha = tk.StringVar(); self.filtro_alimentador = tk.StringVar(); self.filtro_condicao = tk.StringVar()
         self.logo_photo = None
         self.criar_widgets()
@@ -295,7 +300,7 @@ class VisualizacaoFrame(tk.Frame):
         style.configure("Treeview", font=FONTE_PADRAO, rowheight=30)
         style.configure("Treeview.Heading", font=FONTE_PADRAO)
         
-        top_frame = tk.Frame(self)
+        top_frame = tk.Frame(self, bg=self.cor_fundo_principal)
         top_frame.pack(fill='x', pady=10)
 
         try:
@@ -313,7 +318,7 @@ class VisualizacaoFrame(tk.Frame):
             
             self.logo_photo = ImageTk.PhotoImage(resized_image)
             
-            logo_label = tk.Label(top_frame, image=self.logo_photo)
+            logo_label = tk.Label(top_frame, image=self.logo_photo, bg=self.cor_fundo_principal)
             logo_label.pack()
         except Exception as e:
             print(f"Aviso: Não foi possível carregar o logo no módulo de Visualização. Erro: {e}")
