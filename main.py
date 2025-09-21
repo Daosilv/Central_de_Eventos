@@ -458,10 +458,14 @@ class MenuFrame(tk.Frame):
         cor_botao_hover = "#c2e08a"      # Verde mais claro para hover
 
         self.configure(bg=cor_fundo_principal)
-        
-        title_frame = tk.Frame(self, bg=cor_fundo_principal, relief="raised", bd=0)
-        title_frame.pack(side="top", fill="x", pady=20)
-        
+
+        # --- Top Frame (para o logo e título) ---
+        top_frame = tk.Frame(self, bg=cor_fundo_principal)
+        top_frame.place(relx=0, rely=0, relwidth=1, relheight=0.5)
+
+        title_frame = tk.Frame(top_frame, bg=cor_fundo_principal)
+        title_frame.pack(expand=True)
+
         if logo:
             logo_label = tk.Label(title_frame, image=logo, bg=cor_fundo_principal)
             logo_label.pack(pady=10)
@@ -469,8 +473,12 @@ class MenuFrame(tk.Frame):
             fallback_text = "Plemt - Plataforma de Estudos de Média Tensão"
             lbl_title = tk.Label(title_frame, text=fallback_text, font=FONTE_TITULO, bg=cor_fundo_principal, fg="#a7c957", pady=20)
             lbl_title.pack()
-        
-        buttons_frame = tk.Frame(self, bg=cor_fundo_principal)
+
+        # --- Bottom Frame (faixa branca para os botões) ---
+        bottom_frame = tk.Frame(self, bg="white", bd=2, relief="raised")
+        bottom_frame.place(relx=0, rely=0.5, relwidth=1, relheight=0.5)
+
+        buttons_frame = tk.Frame(bottom_frame, bg="white")
         buttons_frame.pack(expand=True)
         
         style = ttk.Style()
