@@ -55,13 +55,11 @@ class BuscaDialog(tk.Toplevel):
         self.transient(parent)
         self.grab_set()
 
-        # Centraliza a janela
         self.controller.center_window(self)
 
         main_frame = tk.Frame(self, padx=10, pady=10)
         main_frame.pack(fill="both", expand=True)
 
-        # --- Filtros ---
         frame_filtros = tk.LabelFrame(main_frame, text="Filtros", padx=10, pady=10)
         frame_filtros.pack(fill="x", pady=(0, 10))
         
@@ -81,7 +79,6 @@ class BuscaDialog(tk.Toplevel):
         btn_buscar = ttk.Button(frame_filtros, text="Buscar", command=self.executar_busca)
         btn_buscar.grid(row=1, column=3, padx=5, pady=5, sticky="e")
 
-        # --- Resultados ---
         frame_resultados = tk.LabelFrame(main_frame, text="Resultados", padx=10, pady=10)
         frame_resultados.pack(fill="both", expand=True)
 
@@ -93,7 +90,6 @@ class BuscaDialog(tk.Toplevel):
         scrollbar.config(command=self.listbox_resultados.yview)
         self.id_map = {}
 
-        # --- Botões de Ação ---
         frame_botoes = tk.Frame(main_frame)
         frame_botoes.pack(fill="x", pady=(10, 0))
         ttk.Button(frame_botoes, text="Carregar", command=self.carregar_selecionado).pack(side="right", padx=5)
@@ -143,13 +139,14 @@ class AutocompleteCombobox(ttk.Combobox):
         self._completion_list = []
         self.set_completion_list([])
         self.bind('<KeyRelease>', self._on_keyrelease)
+        self.bind('<FocusOut>', self._on_focus_out)
 
     def set_completion_list(self, completion_list):
         self._completion_list = sorted(list(set(completion_list)))
         self['values'] = self._completion_list
     
     def _on_keyrelease(self, event):
-        value = self.get()
+        value = self.get().lower()
         
         if event.keysym in ("BackSpace", "Delete", "Left", "Right", "Home", "End"):
             pass
@@ -160,15 +157,22 @@ class AutocompleteCombobox(ttk.Combobox):
         else:
             data = []
             for item in self._completion_list:
-                if item.lower().startswith(value.lower()):
+                if item.lower().startswith(value):
                     data.append(item)
             
             if self['values'] != tuple(data):
                 self['values'] = data
         
         if self.get() and self['values']:
-            self.tk.eval('ttk::combobox::Post {w}'.format(w=self))
-            self.set(value)
+             self.event_generate('<Down>')
+
+    def _on_focus_out(self, event):
+        current_value = self.get()
+        if current_value and self['values'] and current_value not in self['values']:
+            if self['values'] and self['values'][0].lower().startswith(current_value.lower()):
+                self.set(self['values'][0])
+            else:
+                self.set('')
 
 class MemorialCalculoFrame(tk.Frame):
     def __init__(self, parent, controller):
@@ -216,7 +220,6 @@ class MemorialCalculoFrame(tk.Frame):
         self.campos_dict = { 
             "Autor": tk.StringVar(), "Eqpto": tk.StringVar(), "Malha": tk.StringVar(), 
             "Condição": tk.StringVar(), "Motivador": tk.StringVar(), "Alimentador": tk.StringVar(), 
-            "Alimentador_2": tk.StringVar(),
             "NS": tk.StringVar(), "Siom": tk.StringVar(), "Data": tk.StringVar(value=datetime.now().strftime('%d/%m/%Y')), 
             "Coord": tk.StringVar(), "Endereço": tk.StringVar(), "Mídia": tk.StringVar(), 
             "Fabricante": tk.StringVar(), "Modelo": tk.StringVar(), "Comando": tk.StringVar(), 
@@ -253,6 +256,7 @@ class MemorialCalculoFrame(tk.Frame):
         self.ref_cells_rep = []
         self.vars_grupos_secc = {}
         self.tabelas_grupo_frames_secc = []
+        self.tempo_morto_widgets = []
 
         self.vcmd_limite = self.register(self._limitar_tamanho)
         self.vcmd_4 = self.register(lambda P: self._limitar_tamanho(P, '4'))
@@ -281,8 +285,9 @@ class MemorialCalculoFrame(tk.Frame):
         colunas_grupos_rep = [f'g{i}_{c}_rep' for i in range(1, 4) for c in campos_grupo]
         campos_grupo_secc = ["pickup_fase", "sequencia", "pickup_terra", "sequencia_terra"]
         colunas_grupos_secc = [f'g{i}_{c}_secc' for i in range(1, 4) for c in campos_grupo_secc]
+        colunas_tempo_morto = [f'tempo_morto_v{i}' for i in range(1, 6)]
         colunas_adicionais = ['observacoes', 'anexos']
-        return colunas_principais + colunas_grupos + colunas_grupos_rep + colunas_grupos_secc + colunas_adicionais
+        return colunas_principais + colunas_grupos + colunas_grupos_rep + colunas_grupos_secc + colunas_tempo_morto + colunas_adicionais
 
     def criar_layout_principal(self, scroll_container):
         scroll_container.grid_rowconfigure(0, weight=1); scroll_container.grid_columnconfigure(0, weight=1)
@@ -365,8 +370,8 @@ class MemorialCalculoFrame(tk.Frame):
 
         row2_frame = tk.Frame(frame_campos, bg='white'); row2_frame.grid(row=1, column=0, sticky="ew", pady=(0, 2))
         self._criar_celula_cabecalho(row2_frame, "Malha:", self.campos_dict["Malha"], AutocompleteCombobox, {}, 6, 10, categoria_db='malha', tipo_lista='geral')
-        self._criar_celula_cabecalho(row2_frame, "Alimentador:", self.campos_dict["Alimentador"], AutocompleteCombobox, {}, 10, 14, categoria_db='alimentador', tipo_lista='geral')
-        self._criar_celula_cabecalho(row2_frame, "", self.campos_dict["Alimentador_2"], AutocompleteCombobox, {}, 0, 14, categoria_db='alimentador', tipo_lista='geral', nome_widget='alimentador_2')
+        self._criar_celula_cabecalho(row2_frame, "Alimentador:", self.campos_dict["Alimentador"], AutocompleteCombobox, {}, 10, 17, categoria_db='alimentador', tipo_lista='geral')
+        self._criar_celula_cabecalho(row2_frame, "Motivador:", self.campos_dict["Motivador"], AutocompleteCombobox, {}, 8, 8, categoria_db='motivador', tipo_lista='geral')
         self._criar_celula_cabecalho(row2_frame, "Coord:", self.campos_dict["Coord"], tk.Entry, {}, 5, 20)
         self._criar_celula_cabecalho(row2_frame, "Endereço:", self.campos_dict["Endereço"], tk.Entry, {}, 8, 45, expand=True)
 
@@ -382,7 +387,6 @@ class MemorialCalculoFrame(tk.Frame):
         self._criar_celula_cabecalho(row4_frame, "By-Pass:", self.campos_dict["Bypass"], ttk.Combobox, {'state': 'readonly'}, 6, 10, categoria_db='bypass', tipo_lista='geral')
         self._criar_celula_cabecalho(row4_frame, "Manobra Efetiva:", self.campos_dict["Manobra Efetiva"], AutocompleteCombobox, {}, 14, 5, categoria_db='manobra_efetiva', tipo_lista='geral')
         self._criar_celula_cabecalho(row4_frame, "Vinculado a Acessante:", self.campos_dict["Vinculado a Acessante"], AutocompleteCombobox, {}, 19, 5, categoria_db='vinculado_acessante', tipo_lista='geral')
-        self._criar_celula_cabecalho(row4_frame, "Motivador:", self.campos_dict["Motivador"], AutocompleteCombobox, {}, 8, 8, categoria_db='motivador', tipo_lista='geral')
         self.frame_acessante = self._criar_celula_cabecalho(row4_frame, "Eqpto Acessante:", self.campos_dict["Eqpto Acessante"], tk.Entry, {}, 14, 10, expand=True)
 
     def _criar_celula_cabecalho(self, parent, label_text, var, widget_class, widget_options, label_width, entry_width, categoria_db=None, tipo_lista=None, nome_widget=None, expand=False):
@@ -407,6 +411,7 @@ class MemorialCalculoFrame(tk.Frame):
 
         if issubclass(widget_class, ttk.Combobox):
             widget = widget_class(widget_container, **options)
+            widget.bind("<Button-1>", self.open_dropdown_on_click)
 
             if tipo_lista == 'geral' and categoria_db:
                 opcoes = [""] + self._get_opcoes_formatadas_geral(categoria_db)
@@ -435,12 +440,8 @@ class MemorialCalculoFrame(tk.Frame):
         self.controller.atualizar_listas_memorial(self)
         
         for categoria, combobox in self.comboboxes_cabecalho.items():
-            effective_categoria = categoria
-            if categoria == 'alimentador_2':
-                effective_categoria = 'alimentador'
-
-            if effective_categoria not in ['fabricante', 'modelo', 'comando', 'cabo_critico_trecho']:
-                opcoes = self._get_opcoes_formatadas_geral(effective_categoria)
+            if categoria not in ['fabricante', 'modelo', 'comando', 'cabo_critico_trecho']:
+                opcoes = self._get_opcoes_formatadas_geral(categoria)
                 if "" not in opcoes:
                     opcoes.insert(0, "")
                 if isinstance(combobox, AutocompleteCombobox):
@@ -601,6 +602,19 @@ class MemorialCalculoFrame(tk.Frame):
             self.campos_dict["Eqpto Acessante"].set("")
         
     def _construir_bloco_tabelas(self, parent, vars_storage, tables_storage, refs_storage, tipo_bloco):
+        if tipo_bloco == 'original':
+            grid_container = tk.Frame(parent, bg='white')
+            grid_container.pack()
+            
+            side_table_frame = tk.Frame(grid_container, bg='white')
+            side_table_frame.grid(row=0, column=0, sticky='n', padx=(0, 5))
+            self._criar_tabela_lateral(side_table_frame)
+            
+            main_table_frame = tk.Frame(grid_container, bg='white')
+            main_table_frame.grid(row=0, column=1, sticky='n')
+            
+            parent = main_table_frame
+
         textos_header = {
             "original": "Grupo Normal = Grupo de Consumo",
             "replicado": "Grupo Inverso = Grupo de Injeção"
@@ -614,6 +628,23 @@ class MemorialCalculoFrame(tk.Frame):
         tables_storage.clear(); refs_storage.clear(); tables_storage.append(header)
         for i in range(1, 4): t, r, v = self.criar_tabela_grupo(parent, f"  Grupo {i}  "); vars_storage[f'grupo_{i}'] = v; tables_storage.append(t); refs_storage.append(r)
         self.criar_tabela_grupo4(parent, tables_storage)
+
+    def _criar_tabela_lateral(self, parent):
+        self.tempo_morto_widgets.clear()
+        heights = [95, 95, 95, 95, 65] 
+        width = self.col_widths[0] * 2.5
+
+        for i in range(5):
+            row_container = tk.Frame(parent, height=heights[i], width=width)
+            row_container.grid(row=i, column=0)
+            row_container.pack_propagate(False)
+
+            cell_frame = tk.Frame(row_container, bd=1, relief="solid")
+            cell_frame.pack(fill='both', expand=True, pady=(0, 5)) 
+
+            text_widget = tk.Text(cell_frame, font=FONTE_PEQUENA, relief='flat', wrap=tk.WORD, bd=0, highlightthickness=0)
+            text_widget.pack(fill='both', expand=True, padx=2, pady=2)
+            self.tempo_morto_widgets.append(text_widget)
 
     def _construir_bloco_tabelas_secc(self, parent, vars_storage, tables_storage):
         header = tk.Frame(parent, bd=1, relief="solid", bg='white')
@@ -679,7 +710,6 @@ class MemorialCalculoFrame(tk.Frame):
     def _gerenciar_visibilidade_tabelas(self, *args):
         cond = self.campos_dict["Condição"].get().upper()
 
-        # Lógica para Tabela Normal vs Seccionalizador
         if cond in ["SECC NA", "SECC NF"]:
             self.wrap_tabelas.grid_forget()
             [var.set("") for g in self.vars_grupos.values() for var in g.values()]
@@ -692,7 +722,6 @@ class MemorialCalculoFrame(tk.Frame):
             
             self.wrap_tabelas.grid(row=0, column=0, sticky="nsew")
 
-        # Lógica para Tabela Inverso (independente da anterior)
         new_state = 'normal' if cond in ["ACESS INV", "ACESS S/INV"] else 'disabled'
         self._set_widgets_state(self.frame_bloco_tabelas_replicado, new_state)
         if new_state == 'disabled':
@@ -776,9 +805,7 @@ class MemorialCalculoFrame(tk.Frame):
     
     def criar_tabela_grupo_secc(self, parent, group_name):
         group_vars = {k: tk.StringVar() for k in ["pickup_fase", "sequencia", "pickup_terra", "sequencia_terra"]}
-        frame_tabela = tk.Frame(parent, bd=1, relief="solid", bg='white')
-        [frame_tabela.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]
-        [frame_tabela.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]
+        frame_tabela = tk.Frame(parent, bd=1, relief="solid", bg='white'); [frame_tabela.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [frame_tabela.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]
         
         def _sync_seq(*args):
             group_vars["sequencia_terra"].set(group_vars["sequencia"].get())
@@ -817,6 +844,10 @@ class MemorialCalculoFrame(tk.Frame):
         
     def _get_form_data(self):
         data = {k.lower().replace(" ", "_"): v.get() for k, v in self.campos_dict.items()}
+        
+        for i, widget in enumerate(self.tempo_morto_widgets, 1):
+            data[f'tempo_morto_v{i}'] = widget.get("1.0", "end-1c").strip()
+
         for i in range(1, 4):
             if f'grupo_{i}' in self.vars_grupos: data.update({f'g{i}_{vn}': v.get() for vn, v in self.vars_grupos[f'grupo_{i}'].items()})
         if self.campos_dict["Condição"].get().upper() in ["ACESS INV", "ACESS S/INV"]:
@@ -962,6 +993,11 @@ class MemorialCalculoFrame(tk.Frame):
         for nome, var in self.campos_dict.items():
             valor = dados_dict.get(nome.lower().replace(" ", "_"))
             var.set(valor if valor is not None else "")
+        
+        for i, widget in enumerate(self.tempo_morto_widgets, 1):
+            valor = dados_dict.get(f"tempo_morto_v{i}")
+            if valor is not None:
+                widget.insert("1.0", valor)
 
         for i in range(1, 4):
             if f'grupo_{i}' in self.vars_grupos:
@@ -1015,6 +1051,7 @@ class MemorialCalculoFrame(tk.Frame):
         for i in sorted(indices, reverse=True): self.anexos_list.pop(i); window.listbox.delete(i)
     def limpar_formulario(self):
         for var in self.campos_dict.values(): var.set("")
+        for widget in self.tempo_morto_widgets: widget.delete("1.0", "end")
         self.campos_dict["Data"].set(datetime.now().strftime('%d/%m/%Y'))
         for g in self.vars_grupos.values(): [v.set("") for v in g.values()]
         for g in self.vars_grupos_rep.values(): [v.set("") for v in g.values()]

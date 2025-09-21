@@ -62,7 +62,6 @@ class DetalhesWindow(tk.Toplevel):
         self.canvas.unbind_all("<MouseWheel>")
 
     def _sanitize(self, text):
-        """Converte None e a string 'none' para uma string vazia."""
         if text is None or str(text).lower() == 'none':
             return ""
         return text
@@ -88,7 +87,6 @@ class DetalhesWindow(tk.Toplevel):
         main_container = tk.Frame(self.scrollable_frame, padx=10, pady=10)
         main_container.pack(fill="both", expand=True)
 
-        # --- CABEÇALHO ---
         header_frame = tk.Frame(main_container)
         header_frame.pack(fill='x', pady=(0, 15), anchor='w')
 
@@ -176,18 +174,72 @@ class DetalhesWindow(tk.Toplevel):
         self._cell(f_cabo, 0, 0, "Cabo crítico no trecho"); self._cell(f_cabo, 0, 1, "Nominal [A]"); self._cell(f_cabo, 0, 2, "Admissível [A]")
         self._cell(f_cabo, 1, 0, d.get("cabo_critico_trecho")); self._cell(f_cabo, 1, 1, d.get("cabo_critico_nominal")); self._cell(f_cabo, 1, 2, d.get("cabo_critico_admissivel"))
         
-        wrap_tabelas = tk.Frame(main_container); wrap_tabelas.pack(pady=10, anchor="center")
-        header = tk.Frame(wrap_tabelas, bd=1, relief="solid"); [header.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [header.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]; self._cell(header, 0, 0, "Grupo Normal = Grupo de Consumo", cs=9); self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  "); header.pack(pady=5)
-        for i in range(1, 4): self._criar_tabela_grupo_visualizacao(wrap_tabelas, f"  Grupo {i}  ", i)
-        
         condicao_upper = (d.get("condição") or "").upper()
-        if condicao_upper in ["ACESS INV", "ACESS S/INV"]:
-            header_rep = tk.Frame(wrap_tabelas, bd=1, relief="solid"); [header_rep.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [header_rep.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]; self._cell(header_rep, 0, 0, "Grupo Invertido = Grupo de Injeção", cs=9); self._cell(header_rep, 1, 0, "  Grupos  ", rs=2); self._cell(header_rep, 1, 1, "FASE", cs=4); self._cell(header_rep, 1, 5, "TERRA", cs=4); self._cell(header_rep, 2, 1, "  Pickup  "); self._cell(header_rep, 2, 2, "  Sequência  "); self._cell(header_rep, 2, 3, "  Curva Lenta  "); self._cell(header_rep, 2, 4, "  Curva Rápida  "); self._cell(header_rep, 2, 5, "  Pickup  "); self._cell(header_rep, 2, 6, "  Sequência  "); self._cell(header_rep, 2, 7, "  Curva Lenta  "); self._cell(header_rep, 2, 8, "  Curva Rápida  "); header_rep.pack(pady=(20, 5))
-            for i in range(1, 4): self._criar_tabela_grupo_visualizacao(wrap_tabelas, f"  Grupo {i}  ", i, suffix="_rep")
+
+        if condicao_upper in ["SECC NA", "SECC NF"]:
+            wrap_tabelas_secc = tk.Frame(main_container)
+            wrap_tabelas_secc.pack(pady=10, anchor="center")
+            header = tk.Frame(wrap_tabelas_secc, bd=1, relief="solid"); [header.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [header.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]; self._cell(header, 0, 0, "Parâmetros do Seccionalizador", cs=9); self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  "); header.pack(pady=5)
+            for i in range(1, 4): self._criar_tabela_secc_visualizacao(wrap_tabelas_secc, f"  Grupo {i}  ", i)
+        else:
+            wrap_tabelas = tk.Frame(main_container); wrap_tabelas.pack(pady=10, anchor="center")
+            
+            grid_container = tk.Frame(wrap_tabelas); grid_container.pack()
+            side_table_frame = tk.Frame(grid_container); side_table_frame.grid(row=0, column=0, sticky='n', padx=(0, 5))
+            self._criar_tabela_lateral_visualizacao(side_table_frame)
+            main_table_frame = tk.Frame(grid_container); main_table_frame.grid(row=0, column=1, sticky='n')
+
+            header = tk.Frame(main_table_frame, bd=1, relief="solid"); [header.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [header.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]; self._cell(header, 0, 0, "Grupo Normal = Grupo de Consumo", cs=9); self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  "); header.pack(pady=5)
+            for i in range(1, 4): self._criar_tabela_grupo_visualizacao(main_table_frame, f"  Grupo {i}  ", i)
+            
+            if condicao_upper in ["ACESS INV", "ACESS S/INV"]:
+                header_rep = tk.Frame(wrap_tabelas, bd=1, relief="solid"); [header_rep.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [header_rep.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]; self._cell(header_rep, 0, 0, "Grupo Invertido = Grupo de Injeção", cs=9); self._cell(header_rep, 1, 0, "  Grupos  ", rs=2); self._cell(header_rep, 1, 1, "FASE", cs=4); self._cell(header_rep, 1, 5, "TERRA", cs=4); self._cell(header_rep, 2, 1, "  Pickup  "); self._cell(header_rep, 2, 2, "  Sequência  "); self._cell(header_rep, 2, 3, "  Curva Lenta  "); self._cell(header_rep, 2, 4, "  Curva Rápida  "); self._cell(header_rep, 2, 5, "  Pickup  "); self._cell(header_rep, 2, 6, "  Sequência  "); self._cell(header_rep, 2, 7, "  Curva Lenta  "); self._cell(header_rep, 2, 8, "  Curva Rápida  "); header_rep.pack(pady=(20, 5))
+                for i in range(1, 4): self._criar_tabela_grupo_visualizacao(wrap_tabelas, f"  Grupo {i}  ", i, suffix="_rep")
         
         frame_obs = tk.Frame(main_container); frame_obs.pack(pady=(10, 5), padx=10, fill='x', expand=False); tk.Label(frame_obs, text="Observações:", font=FONTE_PADRAO).pack(anchor='w'); text_container = tk.Frame(frame_obs, height=120, relief="solid", bd=1); text_container.pack(fill='x', expand=False); text_container.pack_propagate(False); obs_text = tk.Text(text_container, relief="flat", bd=0, font=FONTE_PADRAO, wrap="word"); obs_text.insert("1.0", d.get("observacoes") or "Nenhuma observação."); obs_text.config(state="disabled"); obs_text.pack(fill="both", expand=True)
         
         ttk.Button(main_container, text="Fechar", command=self.destroy).pack(pady=20)
+
+    def _criar_tabela_lateral_visualizacao(self, parent):
+        d = self.dados_ficha
+        heights = [95, 95, 95, 95, 65]
+        width = int(self.col_widths[0] * 2.5)
+
+        for i in range(5):
+            row_container = tk.Frame(parent, height=heights[i], width=width)
+            row_container.grid(row=i, column=0)
+            row_container.pack_propagate(False)
+
+            cell_frame = tk.Frame(row_container, bd=1, relief="solid")
+            cell_frame.pack(fill='both', expand=True, pady=(0, 5))
+
+            value = d.get(f'tempo_morto_v{i+1}')
+            safe_value = self._sanitize(value)
+            
+            lbl = tk.Label(cell_frame, text=safe_value, font=FONTE_PEQUENA, justify='left', anchor='nw', wraplength=width-10)
+            lbl.pack(fill='both', expand=True, padx=4, pady=4)
+
+    def _criar_tabela_secc_visualizacao(self, parent, group_name, group_index):
+        frame_tabela = tk.Frame(parent, bd=1, relief="solid"); [frame_tabela.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [frame_tabela.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]; d = self.dados_ficha; suffix = "_secc"
+        self._cell(frame_tabela, 0, 0, group_name, rs=3)
+        self._cell(frame_tabela, 0, 1, d.get(f'g{group_index}_pickup_fase{suffix}'), rs=3)
+        self._cell(frame_tabela, 0, 2, d.get(f'g{group_index}_sequencia{suffix}'), rs=3)
+        self._cell(frame_tabela, 0, 3, "SECCIONALIZADOR", font=("Times New Roman", 8))
+        sub_lenta = tk.Frame(frame_tabela, bd=0); sub_lenta.grid(row=1, column=3, rowspan=2, sticky="nsew"); sub_lenta.grid_rowconfigure(0, weight=1); sub_lenta.grid_rowconfigure(1, weight=1); sub_lenta.grid_columnconfigure(0, weight=1); sub_lenta.grid_columnconfigure(1, weight=1)
+        tk.Label(sub_lenta, text="Dial", font=FONTE_PADRAO, relief="solid", bd=1, width=6).grid(row=0, column=0, sticky="nsew")
+        tk.Label(sub_lenta, text="T. Adic.", font=FONTE_PADRAO, relief="solid", bd=1, width=6).grid(row=0, column=1, sticky="nsew")
+        self._cell(sub_lenta, 1, 0, ""); self._cell(sub_lenta, 1, 1, "")
+        self._cell(frame_tabela, 0, 4, "")
+        sub_rapida = tk.Frame(frame_tabela, bd=0); sub_rapida.grid(row=1, column=4, rowspan=2, sticky="nsew"); sub_rapida.grid_rowconfigure(0, weight=1); sub_rapida.grid_rowconfigure(1, weight=1); sub_rapida.grid_columnconfigure(0, weight=1); sub_rapida.grid_columnconfigure(1, weight=1)
+        tk.Label(sub_rapida, text="Dial", font=FONTE_PADRAO, relief="solid", bd=1, width=6).grid(row=0, column=0, sticky="nsew")
+        tk.Label(sub_rapida, text="T. Adic.", font=FONTE_PADRAO, relief="solid", bd=1, width=6).grid(row=0, column=1, sticky="nsew")
+        self._cell(sub_rapida, 1, 0, ""); self._cell(sub_rapida, 1, 1, "")
+        self._cell(frame_tabela, 0, 5, d.get(f'g{group_index}_pickup_terra{suffix}'), rs=3)
+        self._cell(frame_tabela, 0, 6, d.get(f'g{group_index}_sequencia_terra{suffix}'), rs=3)
+        self._cell(frame_tabela, 0, 7, "SECCIONALIZADOR", font=("Times New Roman", 8))
+        self._cell(frame_tabela, 1, 7, "Tempo (s)"); self._cell(frame_tabela, 2, 7, "")
+        self._cell(frame_tabela, 0, 8, ""); self._cell(frame_tabela, 1, 8, "Tempo (s)"); self._cell(frame_tabela, 2, 8, "")
+        frame_tabela.pack(pady=(0, 5))
 
     def _criar_tabela_grupo_visualizacao(self, parent, group_name, group_index, suffix=""):
         frame_tabela = tk.Frame(parent, bd=1, relief="solid"); [frame_tabela.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [frame_tabela.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]; d = self.dados_ficha
