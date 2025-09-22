@@ -903,7 +903,10 @@ class MemorialCalculoFrame(tk.Frame):
         data = {k.lower().replace(" ", "_"): v.get() for k, v in self.campos_dict.items()}
         
         for i, widget in enumerate(self.tempo_morto_widgets, 1):
-            data[f'tempo_morto_v{i}'] = widget.get("1.0", "end-1c").strip()
+            if hasattr(widget, 'get'):
+                data[f'tempo_morto_v{i}'] = widget.get("1.0", "end-1c").strip()
+            else:
+                data[f'tempo_morto_v{i}'] = ""
         
         # Os dados das tabelas laterais replicadas não são salvos,
         # pois não existem colunas correspondentes no banco de dados.
