@@ -1052,33 +1052,35 @@ class MemorialCalculoFrame(tk.Frame):
 
         for nome, var in self.campos_dict.items():
             valor = dados_dict.get(nome.lower().replace(" ", "_"))
-            var.set(valor if valor is not None else "")
+            var.set(valor if valor is not None and valor != 'None' else "")
         
         for i, widget in enumerate(self.tempo_morto_widgets, 1):
             valor = dados_dict.get(f"tempo_morto_v{i}")
-            if valor is not None:
-                widget.insert("1.0", valor)
+            if valor is not None and valor != 'None':
+                if hasattr(widget, 'insert'):
+                    widget.insert("1.0", valor)
 
         for i in range(1, 4):
             if f'grupo_{i}' in self.vars_grupos:
                 for k, v in self.vars_grupos[f'grupo_{i}'].items():
                     valor = dados_dict.get(f"g{i}_{k}")
-                    v.set(valor if valor is not None else "")
+                    v.set(valor if valor is not None and valor != 'None' else "")
 
         for i in range(1, 4):
             if f'grupo_{i}' in self.vars_grupos_rep:
                 for k, v in self.vars_grupos_rep[f'grupo_{i}'].items():
                     valor = dados_dict.get(f"g{i}_{k}_rep")
-                    v.set(valor if valor is not None else "")
+                    v.set(valor if valor is not None and valor != 'None' else "")
 
         for i in range(1, 4):
             if f'grupo_{i}' in self.vars_grupos_secc:
                 for k, v in self.vars_grupos_secc[f'grupo_{i}'].items():
                     valor = dados_dict.get(f"g{i}_{k}_secc")
-                    v.set(valor if valor is not None else "")
+                    v.set(valor if valor is not None and valor != 'None' else "")
 
         obs_text = dados_dict.get("observacoes")
-        self.text_obs.insert("1.0", obs_text if obs_text is not None else "")
+        if obs_text is not None and obs_text != 'None':
+            self.text_obs.insert("1.0", obs_text)
 
         anexos_json = dados_dict.get("anexos", "[]")
         try:
@@ -1112,9 +1114,15 @@ class MemorialCalculoFrame(tk.Frame):
     def limpar_formulario(self):
         for var in self.campos_dict.values(): var.set("")
         self.alimentador_parte_2_var.set("")
-        for widget in self.tempo_morto_widgets: widget.delete("1.0", "end")
-        for widget in self.tempo_morto_widgets_rep: widget.delete("1.0", "end")
-        for widget in self.tempo_morto_widgets_secc: widget.delete("1.0", "end")
+        for widget in self.tempo_morto_widgets:
+            if hasattr(widget, 'delete'):
+                widget.delete("1.0", "end")
+        for widget in self.tempo_morto_widgets_rep:
+            if hasattr(widget, 'delete'):
+                widget.delete("1.0", "end")
+        for widget in self.tempo_morto_widgets_secc:
+            if hasattr(widget, 'delete'):
+                widget.delete("1.0", "end")
         self.campos_dict["Data"].set(datetime.now().strftime('%d/%m/%Y'))
         for g in self.vars_grupos.values(): [v.set("") for v in g.values()]
         for g in self.vars_grupos_rep.values(): [v.set("") for v in g.values()]
