@@ -256,7 +256,10 @@ class MemorialCalculoFrame(tk.Frame):
         self.ref_cells_rep = []
         self.vars_grupos_secc = {}
         self.tabelas_grupo_frames_secc = []
+        
         self.tempo_morto_widgets = []
+        self.tempo_morto_widgets_rep = []
+        self.tempo_morto_widgets_secc = []
 
         self.vcmd_limite = self.register(self._limitar_tamanho)
         self.vcmd_4 = self.register(lambda P: self._limitar_tamanho(P, '4'))
@@ -602,68 +605,102 @@ class MemorialCalculoFrame(tk.Frame):
             self.campos_dict["Eqpto Acessante"].set("")
         
     def _construir_bloco_tabelas(self, parent, vars_storage, tables_storage, refs_storage, tipo_bloco):
-        if tipo_bloco == 'original':
-            grid_container = tk.Frame(parent, bg='white')
-            grid_container.pack()
-            
-            side_table_frame = tk.Frame(grid_container, bg='white')
-            side_table_frame.grid(row=0, column=0, sticky='n', padx=(0, 5))
-            self._criar_tabela_lateral(side_table_frame)
-            
-            main_table_frame = tk.Frame(grid_container, bg='white')
-            main_table_frame.grid(row=0, column=1, sticky='n')
-            
-            parent = main_table_frame
+        for widget in parent.winfo_children():
+            widget.destroy()
+
+        widget_list = self.tempo_morto_widgets if tipo_bloco == 'original' else self.tempo_morto_widgets_rep
+        widget_list.clear()
+
+        parent.grid_columnconfigure(1, weight=1)
+        row_heights = [90, 90, 90, 90, 60]
 
         textos_header = {
             "original": "Grupo Normal = Grupo de Consumo",
             "replicado": "Grupo Inverso = Grupo de Injeção"
         }
         header = tk.Frame(parent, bd=1, relief="solid", bg='white')
-        [header.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]
+        [header.grid_columnconfigure(c, minsize=w, weight=1) for c, w in enumerate(self.col_widths)]
         [header.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]
         self._cell(header, 0, 0, textos_header.get(tipo_bloco, ""), cs=9)
-        self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  "); header.pack(pady=5)
+        self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  ")
+        header.grid(row=0, column=1, pady=5, sticky='ew')
+        
+        side_cell_1 = self._criar_celula_lateral(parent, row_heights[0], widget_list)
+        side_cell_1.grid(row=0, column=0, sticky='ns', padx=(0, 5), pady=5)
         
         tables_storage.clear(); refs_storage.clear(); tables_storage.append(header)
-        for i in range(1, 4): t, r, v = self.criar_tabela_grupo(parent, f"  Grupo {i}  "); vars_storage[f'grupo_{i}'] = v; tables_storage.append(t); refs_storage.append(r)
-        self.criar_tabela_grupo4(parent, tables_storage)
+        
+        for i in range(1, 4):
+            t, r, v = self.criar_tabela_grupo(parent, f"  Grupo {i}  ")
+            vars_storage[f'grupo_{i}'] = v; tables_storage.append(t); refs_storage.append(r)
+            t.grid(row=i, column=1, pady=(0, 5), sticky='ew')
+            
+            side_cell = self._criar_celula_lateral(parent, row_heights[i], widget_list)
+            side_cell.grid(row=i, column=0, sticky='ns', padx=(0, 5), pady=(0,5))
 
-    def _criar_tabela_lateral(self, parent):
-        self.tempo_morto_widgets.clear()
-        heights = [95, 95, 95, 95, 65] 
+        t4 = self.criar_tabela_grupo4(parent)
+        tables_storage.append(t4)
+        t4.grid(row=4, column=1, pady=(0, 5), sticky='ew')
+        
+        side_cell_5 = self._criar_celula_lateral(parent, row_heights[4], widget_list)
+        side_cell_5.grid(row=4, column=0, sticky='ns', padx=(0, 5), pady=(0,5))
+
+    def _criar_celula_lateral(self, parent, height, widget_list):
         width = self.col_widths[0] * 2.5
+        
+        container = tk.Frame(parent, height=height, width=int(width), bg='white')
+        container.pack_propagate(False)
 
-        for i in range(5):
-            row_container = tk.Frame(parent, height=heights[i], width=width)
-            row_container.grid(row=i, column=0)
-            row_container.pack_propagate(False)
+        cell_frame = tk.Frame(container, bd=1, relief="solid", bg='white')
+        cell_frame.pack(fill='both', expand=True)
 
-            cell_frame = tk.Frame(row_container, bd=1, relief="solid")
-            cell_frame.pack(fill='both', expand=True, pady=(0, 5)) 
-
-            text_widget = tk.Text(cell_frame, font=FONTE_PEQUENA, relief='flat', wrap=tk.WORD, bd=0, highlightthickness=0)
-            text_widget.pack(fill='both', expand=True, padx=2, pady=2)
-            self.tempo_morto_widgets.append(text_widget)
+        text_widget = tk.Text(cell_frame, font=FONTE_PEQUENA, relief='flat', wrap=tk.WORD, bd=0, highlightthickness=0)
+        text_widget.pack(fill='both', expand=True, padx=2, pady=2)
+        
+        widget_list.append(text_widget)
+        return container
 
     def _construir_bloco_tabelas_secc(self, parent, vars_storage, tables_storage):
+        for widget in parent.winfo_children():
+            widget.destroy()
+        
+        self.tempo_morto_widgets_secc.clear()
+        parent.grid_columnconfigure(1, weight=1)
+
+        row_heights = [90, 90, 90, 90, 60]
+
         header = tk.Frame(parent, bd=1, relief="solid", bg='white')
-        [header.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]
+        [header.grid_columnconfigure(c, minsize=w, weight=1) for c, w in enumerate(self.col_widths)]
         [header.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]
         self._cell(header, 0, 0, "Parâmetros do Seccionalizador", cs=9)
-        self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  "); header.pack(pady=5)
+        self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  ")
+        header.grid(row=0, column=1, pady=5, sticky='ew')
+        
+        side_cell_1 = self._criar_celula_lateral(parent, row_heights[0], self.tempo_morto_widgets_secc)
+        side_cell_1.grid(row=0, column=0, sticky='ns', padx=(0, 5), pady=5)
         
         tables_storage.clear()
         tables_storage.append(header)
+
         for i in range(1, 4):
             t, v = self.criar_tabela_grupo_secc(parent, f"  Grupo {i}  ")
             vars_storage[f'grupo_{i}'] = v
             tables_storage.append(t)
-        self.criar_tabela_grupo4(parent, tables_storage)
+            t.grid(row=i, column=1, pady=(0, 5), sticky='ew')
 
-    def criar_tabela_grupo4(self, parent, tables_storage):
+            side_cell = self._criar_celula_lateral(parent, row_heights[i], self.tempo_morto_widgets_secc)
+            side_cell.grid(row=i, column=0, sticky='ns', padx=(0, 5), pady=(0,5))
+        
+        t4 = self.criar_tabela_grupo4(parent)
+        tables_storage.append(t4)
+        t4.grid(row=4, column=1, pady=(0, 5), sticky='ew')
+
+        side_cell_5 = self._criar_celula_lateral(parent, row_heights[4], self.tempo_morto_widgets_secc)
+        side_cell_5.grid(row=4, column=0, sticky='ns', padx=(0, 5), pady=(0,5))
+
+    def criar_tabela_grupo4(self, parent):
         f = tk.Frame(parent, bd=1, relief="solid")
-        [f.grid_columnconfigure(i, minsize=w) for i, w in enumerate(self.col_widths)]
+        [f.grid_columnconfigure(i, minsize=w, weight=1) for i, w in enumerate(self.col_widths)]
         f.grid_rowconfigure(0, minsize=60, weight=1)
         self._cell(f, 0, 0, "Grupo 4")
         self._cell(f, 0, 1, "630")
@@ -690,8 +727,7 @@ class MemorialCalculoFrame(tk.Frame):
         tk.Label(s8, text="Lenta", font=FONTE_PEQUENA, width=6, relief="solid", bd=1, bg='white').grid(row=0, column=0, sticky="nsew")
         tk.Label(s8, text="20", font=FONTE_PEQUENA, width=6, relief="solid", bd=1, bg='white').grid(row=0, column=1, sticky="nsew")
 
-        f.pack(pady=(0, 5))
-        tables_storage.append(f)
+        return f
     
     def _set_widgets_state(self, parent, new_state):
         for child in parent.winfo_children():
@@ -763,7 +799,7 @@ class MemorialCalculoFrame(tk.Frame):
         var = self.campos_dict["Coord"]; var.trace_remove("write", var.trace_info()[0][1]); valor = ''.join(filter(str.isdigit, var.get()))[:13]; var.set(f"{valor[:6]}:{valor[6:]}" if len(valor) > 6 else valor); var.trace_add("write", self.formatar_coord)
     
     def criar_tabela_grupo(self, parent, group_name):
-        group_vars = {k: tk.StringVar() for k in ["pickup_fase", "sequencia", "curva_lenta_tipo", "curva_lenta_dial", "curva_lenta_tadic", "curva_rapida_dial", "curva_rapida_tadic", "pickup_terra", "sequencia_terra", "terra_tempo_lenta", "terra_tempo_rapida"]}; frame_tabela = tk.Frame(parent, bd=1, relief="solid", bg='white'); [frame_tabela.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [frame_tabela.grid_rowconfigure(r, minsize=30, weight=1) for r in range(1, 4)]; entry_fase_rapida_dial, entry_fase_rapida_tadic, entry_terra_rapida_tempo = None, None, None
+        group_vars = {k: tk.StringVar() for k in ["pickup_fase", "sequencia", "curva_lenta_tipo", "curva_lenta_dial", "curva_lenta_tadic", "curva_rapida_dial", "curva_rapida_tadic", "pickup_terra", "sequencia_terra", "terra_tempo_lenta", "terra_tempo_rapida"]}; frame_tabela = tk.Frame(parent, bd=1, relief="solid", bg='white'); [frame_tabela.grid_columnconfigure(c, minsize=w, weight=1) for c, w in enumerate(self.col_widths)]; [frame_tabela.grid_rowconfigure(r, minsize=30, weight=1) for r in range(1, 4)]; entry_fase_rapida_dial, entry_fase_rapida_tadic, entry_terra_rapida_tempo = None, None, None
         def _sync_seq(*args): group_vars["sequencia_terra"].set(group_vars["sequencia"].get())
         def _manage_rapida(*args):
             state = 'disabled' if group_vars["sequencia"].get() in ['1L', '2L', '3L'] else 'normal'
@@ -800,12 +836,12 @@ class MemorialCalculoFrame(tk.Frame):
         self._cell(frame_tabela, 2, 7, "Tempo (s)"); self._cell(frame_tabela, 2, 8, "Tempo (s)"); 
         tk.Entry(frame_tabela, textvariable=group_vars["terra_tempo_lenta"], font=FONTE_PADRAO, width=4, relief="solid", bd=1, justify="center", validate="key", validatecommand=(self.vcmd_4, "%P")).grid(row=3, column=7, sticky="nsew"); 
         entry_terra_rapida_tempo = tk.Entry(frame_tabela, textvariable=group_vars["terra_tempo_rapida"], font=FONTE_PADRAO, width=4, relief="solid", bd=1, justify="center", validate="key", validatecommand=(self.vcmd_4, "%P")); entry_terra_rapida_tempo.grid(row=3, column=8, sticky="nsew"); 
-        frame_tabela.pack(pady=(0, 5)); 
+        
         return frame_tabela, lenta_fase_cell, group_vars
     
     def criar_tabela_grupo_secc(self, parent, group_name):
         group_vars = {k: tk.StringVar() for k in ["pickup_fase", "sequencia", "pickup_terra", "sequencia_terra"]}
-        frame_tabela = tk.Frame(parent, bd=1, relief="solid", bg='white'); [frame_tabela.grid_columnconfigure(c, minsize=w) for c, w in enumerate(self.col_widths)]; [frame_tabela.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]
+        frame_tabela = tk.Frame(parent, bd=1, relief="solid", bg='white'); [frame_tabela.grid_columnconfigure(c, minsize=w, weight=1) for c, w in enumerate(self.col_widths)]; [frame_tabela.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]
         
         def _sync_seq(*args):
             group_vars["sequencia_terra"].set(group_vars["sequencia"].get())
@@ -838,8 +874,7 @@ class MemorialCalculoFrame(tk.Frame):
         self._cell(frame_tabela, 1, 7, "Tempo (s)"); self._cell(frame_tabela, 2, 7, "")
 
         self._cell(frame_tabela, 0, 8, ""); self._cell(frame_tabela, 1, 8, "Tempo (s)"); self._cell(frame_tabela, 2, 8, "")
-
-        frame_tabela.pack(pady=(0, 5))
+        
         return frame_tabela, group_vars
         
     def _get_form_data(self):
@@ -847,6 +882,9 @@ class MemorialCalculoFrame(tk.Frame):
         
         for i, widget in enumerate(self.tempo_morto_widgets, 1):
             data[f'tempo_morto_v{i}'] = widget.get("1.0", "end-1c").strip()
+        
+        # Os dados das tabelas laterais replicadas não são salvos,
+        # pois não existem colunas correspondentes no banco de dados.
 
         for i in range(1, 4):
             if f'grupo_{i}' in self.vars_grupos: data.update({f'g{i}_{vn}': v.get() for vn, v in self.vars_grupos[f'grupo_{i}'].items()})
@@ -1052,6 +1090,8 @@ class MemorialCalculoFrame(tk.Frame):
     def limpar_formulario(self):
         for var in self.campos_dict.values(): var.set("")
         for widget in self.tempo_morto_widgets: widget.delete("1.0", "end")
+        for widget in self.tempo_morto_widgets_rep: widget.delete("1.0", "end")
+        for widget in self.tempo_morto_widgets_secc: widget.delete("1.0", "end")
         self.campos_dict["Data"].set(datetime.now().strftime('%d/%m/%Y'))
         for g in self.vars_grupos.values(): [v.set("") for v in g.values()]
         for g in self.vars_grupos_rep.values(): [v.set("") for v in g.values()]
