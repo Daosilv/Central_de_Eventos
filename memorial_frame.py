@@ -243,6 +243,7 @@ class MemorialCalculoFrame(tk.Frame):
         }
         self.campos_dict["Condição"].trace_add("write", self._gerenciar_visibilidade_tabelas)
         self.campos_dict["Vinculado a Acessante"].trace_add("write", self._gerenciar_campo_acessante)
+        self.alimentador_parte_2_var = tk.StringVar()
         
         self.anexos_list = []
         
@@ -373,8 +374,8 @@ class MemorialCalculoFrame(tk.Frame):
 
         row2_frame = tk.Frame(frame_campos, bg='white'); row2_frame.grid(row=1, column=0, sticky="ew", pady=(0, 2))
         self._criar_celula_cabecalho(row2_frame, "Malha:", self.campos_dict["Malha"], AutocompleteCombobox, {}, 6, 10, categoria_db='malha', tipo_lista='geral')
-        self._criar_celula_cabecalho(row2_frame, "Alimentador:", self.campos_dict["Alimentador"], AutocompleteCombobox, {}, 10, 17, categoria_db='alimentador', tipo_lista='geral')
-        self._criar_celula_cabecalho(row2_frame, "Motivador:", self.campos_dict["Motivador"], AutocompleteCombobox, {}, 8, 8, categoria_db='motivador', tipo_lista='geral')
+        self._criar_celula_cabecalho(row2_frame, "Alimentador:", self.campos_dict["Alimentador"], AutocompleteCombobox, {}, 10, 16, categoria_db='alimentador', tipo_lista='geral')
+        self._criar_celula_cabecalho(row2_frame, "", self.alimentador_parte_2_var, AutocompleteCombobox, {}, 0, 16, categoria_db='alimentador', tipo_lista='geral')
         self._criar_celula_cabecalho(row2_frame, "Coord:", self.campos_dict["Coord"], tk.Entry, {}, 5, 20)
         self._criar_celula_cabecalho(row2_frame, "Endereço:", self.campos_dict["Endereço"], tk.Entry, {}, 8, 45, expand=True)
 
@@ -388,6 +389,7 @@ class MemorialCalculoFrame(tk.Frame):
 
         row4_frame = tk.Frame(frame_campos, bg='white'); row4_frame.grid(row=3, column=0, sticky="ew")
         self._criar_celula_cabecalho(row4_frame, "By-Pass:", self.campos_dict["Bypass"], ttk.Combobox, {'state': 'readonly'}, 6, 10, categoria_db='bypass', tipo_lista='geral')
+        self._criar_celula_cabecalho(row4_frame, "Motivador:", self.campos_dict["Motivador"], AutocompleteCombobox, {}, 8, 8, categoria_db='motivador', tipo_lista='geral')
         self._criar_celula_cabecalho(row4_frame, "Manobra Efetiva:", self.campos_dict["Manobra Efetiva"], AutocompleteCombobox, {}, 14, 5, categoria_db='manobra_efetiva', tipo_lista='geral')
         self._criar_celula_cabecalho(row4_frame, "Vinculado a Acessante:", self.campos_dict["Vinculado a Acessante"], AutocompleteCombobox, {}, 19, 5, categoria_db='vinculado_acessante', tipo_lista='geral')
         self.frame_acessante = self._criar_celula_cabecalho(row4_frame, "Eqpto Acessante:", self.campos_dict["Eqpto Acessante"], tk.Entry, {}, 14, 10, expand=True)
@@ -1109,6 +1111,7 @@ class MemorialCalculoFrame(tk.Frame):
         for i in sorted(indices, reverse=True): self.anexos_list.pop(i); window.listbox.delete(i)
     def limpar_formulario(self):
         for var in self.campos_dict.values(): var.set("")
+        self.alimentador_parte_2_var.set("")
         for widget in self.tempo_morto_widgets: widget.delete("1.0", "end")
         for widget in self.tempo_morto_widgets_rep: widget.delete("1.0", "end")
         for widget in self.tempo_morto_widgets_secc: widget.delete("1.0", "end")
