@@ -635,7 +635,7 @@ class MemorialCalculoFrame(tk.Frame):
             vars_storage[f'grupo_{i}'] = v; tables_storage.append(t); refs_storage.append(r)
             t.grid(row=i, column=2, pady=(0, 5), sticky='ew')
 
-            tk.Label(parent, text="📎", font=("Helvetica", 12), bg='white').grid(row=i, column=0, sticky='e', padx=(0, 5))
+            tk.Button(parent, text="+", font=("Helvetica", 10, "bold"), relief="solid", bd=1, command=self.abrir_anexos, cursor="hand2", bg='white').grid(row=i, column=0, sticky='e', padx=(0, 5))
             
             side_cell = self._criar_celula_lateral(parent, row_heights[i], widget_list)
             side_cell.grid(row=i, column=1, sticky='ns', padx=(0, 5), pady=(0,5))
@@ -683,7 +683,7 @@ class MemorialCalculoFrame(tk.Frame):
             widget.destroy()
         
         self.tempo_morto_widgets_secc.clear()
-        parent.grid_columnconfigure(1, weight=1)
+        parent.grid_columnconfigure(2, weight=1)
 
         row_heights = [90, 90, 90, 90, 60]
 
@@ -692,10 +692,10 @@ class MemorialCalculoFrame(tk.Frame):
         [header.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]
         self._cell(header, 0, 0, "Parâmetros do Seccionalizador", cs=9)
         self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  ")
-        header.grid(row=0, column=1, pady=5, sticky='ew')
+        header.grid(row=0, column=2, pady=5, sticky='ew')
         
         side_cell_1 = self._criar_celula_lateral(parent, row_heights[0], self.tempo_morto_widgets_secc, is_first_cell=True)
-        side_cell_1.grid(row=0, column=0, sticky='ns', padx=(0, 5), pady=5)
+        side_cell_1.grid(row=0, column=1, sticky='ns', padx=(0, 5), pady=5)
         
         tables_storage.clear()
         tables_storage.append(header)
@@ -704,17 +704,19 @@ class MemorialCalculoFrame(tk.Frame):
             t, v = self.criar_tabela_grupo_secc(parent, f"  Grupo {i}  ")
             vars_storage[f'grupo_{i}'] = v
             tables_storage.append(t)
-            t.grid(row=i, column=1, pady=(0, 5), sticky='ew')
+            t.grid(row=i, column=2, pady=(0, 5), sticky='ew')
 
-            side_cell = self._criar_celula_lateral(parent, row_heights[i], self.tempo_morto_widgets_secc, is_group_cell=True)
-            side_cell.grid(row=i, column=0, sticky='ns', padx=(0, 5), pady=(0,5))
+            tk.Button(parent, text="+", font=("Helvetica", 10, "bold"), relief="solid", bd=1, command=self.abrir_anexos, cursor="hand2", bg='white').grid(row=i, column=0, sticky='e', padx=(0, 5))
+
+            side_cell = self._criar_celula_lateral(parent, row_heights[i], self.tempo_morto_widgets_secc)
+            side_cell.grid(row=i, column=1, sticky='ns', padx=(0, 5), pady=(0,5))
         
         t4 = self.criar_tabela_grupo4(parent)
         tables_storage.append(t4)
-        t4.grid(row=4, column=1, pady=(0, 5), sticky='ew')
+        t4.grid(row=4, column=2, pady=(0, 5), sticky='ew')
 
         side_cell_5 = self._criar_celula_lateral(parent, row_heights[4], self.tempo_morto_widgets_secc)
-        side_cell_5.grid(row=4, column=0, sticky='ns', padx=(0, 5), pady=(0,5))
+        side_cell_5.grid(row=4, column=1, sticky='ns', padx=(0, 5), pady=(0,5))
 
     def criar_tabela_grupo4(self, parent):
         f = tk.Frame(parent, bd=1, relief="solid")
