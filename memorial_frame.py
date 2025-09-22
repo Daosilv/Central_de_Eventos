@@ -611,7 +611,7 @@ class MemorialCalculoFrame(tk.Frame):
         widget_list = self.tempo_morto_widgets if tipo_bloco == 'original' else self.tempo_morto_widgets_rep
         widget_list.clear()
 
-        parent.grid_columnconfigure(1, weight=1)
+        parent.grid_columnconfigure(2, weight=1)
         row_heights = [90, 90, 90, 90, 60]
 
         textos_header = {
@@ -623,29 +623,31 @@ class MemorialCalculoFrame(tk.Frame):
         [header.grid_rowconfigure(r, minsize=30, weight=1) for r in range(3)]
         self._cell(header, 0, 0, textos_header.get(tipo_bloco, ""), cs=9)
         self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  ")
-        header.grid(row=0, column=1, pady=5, sticky='ew')
+        header.grid(row=0, column=2, pady=5, sticky='ew')
         
         side_cell_1 = self._criar_celula_lateral(parent, row_heights[0], widget_list, is_first_cell=True)
-        side_cell_1.grid(row=0, column=0, sticky='ns', padx=(0, 5), pady=5)
+        side_cell_1.grid(row=0, column=1, sticky='ns', padx=(0, 5), pady=5)
         
         tables_storage.clear(); refs_storage.clear(); tables_storage.append(header)
         
         for i in range(1, 4):
             t, r, v = self.criar_tabela_grupo(parent, f"  Grupo {i}  ")
             vars_storage[f'grupo_{i}'] = v; tables_storage.append(t); refs_storage.append(r)
-            t.grid(row=i, column=1, pady=(0, 5), sticky='ew')
+            t.grid(row=i, column=2, pady=(0, 5), sticky='ew')
+
+            tk.Label(parent, text="📎", font=("Helvetica", 12), bg='white').grid(row=i, column=0, sticky='e', padx=(0, 5))
             
             side_cell = self._criar_celula_lateral(parent, row_heights[i], widget_list)
-            side_cell.grid(row=i, column=0, sticky='ns', padx=(0, 5), pady=(0,5))
+            side_cell.grid(row=i, column=1, sticky='ns', padx=(0, 5), pady=(0,5))
 
         t4 = self.criar_tabela_grupo4(parent)
         tables_storage.append(t4)
-        t4.grid(row=4, column=1, pady=(0, 5), sticky='ew')
+        t4.grid(row=4, column=2, pady=(0, 5), sticky='ew')
         
         side_cell_5 = self._criar_celula_lateral(parent, row_heights[4], widget_list)
-        side_cell_5.grid(row=4, column=0, sticky='ns', padx=(0, 5), pady=(0,5))
+        side_cell_5.grid(row=4, column=1, sticky='ns', padx=(0, 5), pady=(0,5))
 
-    def _criar_celula_lateral(self, parent, height, widget_list, is_first_cell=False):
+    def _criar_celula_lateral(self, parent, height, widget_list, is_first_cell=False, is_group_cell=False):
         width = self.col_widths[0] * 2.5
         
         container = tk.Frame(parent, height=height, width=int(width), bg='white')
@@ -662,6 +664,14 @@ class MemorialCalculoFrame(tk.Frame):
             lbl = tk.Label(cell_frame, text="Configurações", font=FONTE_PADRAO, bg='white', justify='center', anchor='center')
             lbl.pack(fill='both', expand=True, padx=2, pady=2)
             widget_list.append(lbl) # Append the label to widget_list
+        elif is_group_cell:
+            # Add the attachment icon
+            icon_label = tk.Label(cell_frame, text="+ ", font=("Helvetica", 10, "bold"), bg='white')
+            icon_label.pack(side="left", padx=(2, 0))
+            
+            text_widget = tk.Text(cell_frame, font=FONTE_PEQUENA, relief='flat', wrap=tk.WORD, bd=0, highlightthickness=0)
+            text_widget.pack(fill='both', expand=True, padx=(0, 2), pady=2) # Adjust padx for icon
+            widget_list.append(text_widget)
         else:
             text_widget = tk.Text(cell_frame, font=FONTE_PEQUENA, relief='flat', wrap=tk.WORD, bd=0, highlightthickness=0)
             text_widget.pack(fill='both', expand=True, padx=2, pady=2)
@@ -696,7 +706,7 @@ class MemorialCalculoFrame(tk.Frame):
             tables_storage.append(t)
             t.grid(row=i, column=1, pady=(0, 5), sticky='ew')
 
-            side_cell = self._criar_celula_lateral(parent, row_heights[i], self.tempo_morto_widgets_secc)
+            side_cell = self._criar_celula_lateral(parent, row_heights[i], self.tempo_morto_widgets_secc, is_group_cell=True)
             side_cell.grid(row=i, column=0, sticky='ns', padx=(0, 5), pady=(0,5))
         
         t4 = self.criar_tabela_grupo4(parent)
