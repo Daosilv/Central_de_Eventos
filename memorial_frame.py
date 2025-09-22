@@ -625,7 +625,7 @@ class MemorialCalculoFrame(tk.Frame):
         self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  ")
         header.grid(row=0, column=1, pady=5, sticky='ew')
         
-        side_cell_1 = self._criar_celula_lateral(parent, row_heights[0], widget_list)
+        side_cell_1 = self._criar_celula_lateral(parent, row_heights[0], widget_list, is_first_cell=True)
         side_cell_1.grid(row=0, column=0, sticky='ns', padx=(0, 5), pady=5)
         
         tables_storage.clear(); refs_storage.clear(); tables_storage.append(header)
@@ -645,19 +645,27 @@ class MemorialCalculoFrame(tk.Frame):
         side_cell_5 = self._criar_celula_lateral(parent, row_heights[4], widget_list)
         side_cell_5.grid(row=4, column=0, sticky='ns', padx=(0, 5), pady=(0,5))
 
-    def _criar_celula_lateral(self, parent, height, widget_list):
+    def _criar_celula_lateral(self, parent, height, widget_list, is_first_cell=False):
         width = self.col_widths[0] * 2.5
         
         container = tk.Frame(parent, height=height, width=int(width), bg='white')
         container.pack_propagate(False)
 
-        cell_frame = tk.Frame(container, bd=1, relief="solid", bg='white')
+        # Add an outer frame to simulate the double border
+        outer_frame = tk.Frame(container, bd=1, relief="solid", bg='white')
+        outer_frame.pack(fill='both', expand=True)
+
+        cell_frame = tk.Frame(outer_frame, bd=1, relief="solid", bg='white') # Inner frame still has its border
         cell_frame.pack(fill='both', expand=True)
 
-        text_widget = tk.Text(cell_frame, font=FONTE_PEQUENA, relief='flat', wrap=tk.WORD, bd=0, highlightthickness=0)
-        text_widget.pack(fill='both', expand=True, padx=2, pady=2)
-        
-        widget_list.append(text_widget)
+        if is_first_cell:
+            lbl = tk.Label(cell_frame, text="Configurações", font=FONTE_PADRAO, bg='white', justify='center', anchor='center')
+            lbl.pack(fill='both', expand=True, padx=2, pady=2)
+            widget_list.append(lbl) # Append the label to widget_list
+        else:
+            text_widget = tk.Text(cell_frame, font=FONTE_PEQUENA, relief='flat', wrap=tk.WORD, bd=0, highlightthickness=0)
+            text_widget.pack(fill='both', expand=True, padx=2, pady=2)
+            widget_list.append(text_widget)
         return container
 
     def _construir_bloco_tabelas_secc(self, parent, vars_storage, tables_storage):
@@ -676,7 +684,7 @@ class MemorialCalculoFrame(tk.Frame):
         self._cell(header, 1, 0, "  Grupos  ", rs=2); self._cell(header, 1, 1, "FASE", cs=4); self._cell(header, 1, 5, "TERRA", cs=4); self._cell(header, 2, 1, "  Pickup  "); self._cell(header, 2, 2, "  Sequência  "); self._cell(header, 2, 3, "  Curva Lenta  "); self._cell(header, 2, 4, "  Curva Rápida  "); self._cell(header, 2, 5, "  Pickup  "); self._cell(header, 2, 6, "  Sequência  "); self._cell(header, 2, 7, "  Curva Lenta  "); self._cell(header, 2, 8, "  Curva Rápida  ")
         header.grid(row=0, column=1, pady=5, sticky='ew')
         
-        side_cell_1 = self._criar_celula_lateral(parent, row_heights[0], self.tempo_morto_widgets_secc)
+        side_cell_1 = self._criar_celula_lateral(parent, row_heights[0], self.tempo_morto_widgets_secc, is_first_cell=True)
         side_cell_1.grid(row=0, column=0, sticky='ns', padx=(0, 5), pady=5)
         
         tables_storage.clear()

@@ -451,7 +451,7 @@ class MenuFrame(tk.Frame):
         self.controller = controller
         
         # Cores do novo design
-        cor_fundo_principal = "#0d1b2a"  # Azul escuro
+        cor_fundo_principal = "white"  # Fundo branco
         cor_fundo_botao = "#a7c957"      # Verde claro
         cor_borda_botao = "#386641"      # Verde escuro
         cor_texto_botao = "#ffffff"      # Branco
@@ -460,26 +460,28 @@ class MenuFrame(tk.Frame):
         self.configure(bg=cor_fundo_principal)
 
         # --- Top Frame (para o logo e título) ---
+        # Ajustar para que o logo fique no topo e ocupe menos espaço vertical
         top_frame = tk.Frame(self, bg=cor_fundo_principal)
-        top_frame.place(relx=0, rely=0, relwidth=1, relheight=0.5)
+        top_frame.pack(side="top", fill="x", pady=10) # Pack instead of place for better flow
 
         title_frame = tk.Frame(top_frame, bg=cor_fundo_principal)
-        title_frame.pack(expand=True)
+        title_frame.pack(expand=True) # Center the title/logo horizontally
 
         if logo:
             logo_label = tk.Label(title_frame, image=logo, bg=cor_fundo_principal)
-            logo_label.pack(pady=10)
+            logo_label.pack() # No pady here, let top_frame handle it
         else:
             fallback_text = "Plemt - Plataforma de Estudos de Média Tensão"
             lbl_title = tk.Label(title_frame, text=fallback_text, font=FONTE_TITULO, bg=cor_fundo_principal, fg="#a7c957", pady=20)
             lbl_title.pack()
 
-        # --- Bottom Frame (faixa branca para os botões) ---
-        bottom_frame = tk.Frame(self, bg="white", bd=2, relief="raised")
-        bottom_frame.place(relx=0, rely=0.5, relwidth=1, relheight=0.5)
+        # --- Main content frame for buttons ---
+        # Este frame ocupará o restante do espaço e centralizará os botões
+        content_frame = tk.Frame(self, bg=cor_fundo_principal)
+        content_frame.pack(side="top", fill="both", expand=True)
 
-        buttons_frame = tk.Frame(bottom_frame, bg="white")
-        buttons_frame.pack(expand=True)
+        buttons_frame = tk.Frame(content_frame, bg=cor_fundo_principal)
+        buttons_frame.pack(expand=True) # Center buttons vertically and horizontally
         
         style = ttk.Style()
         style.configure("Menu.TButton", 
