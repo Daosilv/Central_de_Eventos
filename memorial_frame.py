@@ -322,11 +322,27 @@ class MemorialCalculoFrame(tk.Frame):
         self.header_frame = tk.Frame(self.content_holder_frame, bg='white'); self.header_frame.grid(row=1, column=0, sticky="new", padx=10, pady=10)
         self.main_form_frame = tk.Frame(self.content_holder_frame, bg='white'); self.main_form_frame.grid(row=2, column=0, sticky="nsew", padx=10)
         
-        sidebar_frame = tk.LabelFrame(self.content_holder_frame, text="Histórico", width=SIDEBAR_WIDTH, padx=5, pady=5, bg='white'); sidebar_frame.grid(row=1, column=1, rowspan=2, sticky="ns", pady=10)
-        sidebar_frame.pack_propagate(False)
+        # MODIFICAÇÃO INICIADA: Container da borda para a sidebar "Histórico"
+        sidebar_border_frame = tk.Frame(self.content_holder_frame, bg='darkgreen')
+        sidebar_border_frame.grid(row=1, column=1, rowspan=2, sticky="ns", pady=10)
+        
+        # MODIFICAÇÃO: LabelFrame "Histórico" agora está dentro da borda e com fonte preta
+        sidebar_frame = tk.LabelFrame(sidebar_border_frame, text="Histórico", padx=5, pady=5, bg='white', fg='black', relief='flat', bd=0)
+        sidebar_frame.pack(padx=2, pady=2, fill='both', expand=True) # O padding cria o efeito de borda
+        
+        # MODIFICAÇÃO: Configura o container da borda para manter o tamanho fixo
+        sidebar_border_frame.grid_propagate(False)
+        sidebar_border_frame.config(width=SIDEBAR_WIDTH)
 
         ttk.Button(sidebar_frame, text="Atualizar Listas", command=self.atualizar_todas_as_listas).pack(fill='x', pady=(0, 10))
-        ajustes_container = tk.LabelFrame(sidebar_frame, text="Ajustes Recentes", padx=5, pady=5, bg='white'); ajustes_container.pack(fill='both', expand=True, pady=(0, 5))
+        
+        # MODIFICAÇÃO INICIADA: Container da borda para "Ajustes Recentes"
+        ajustes_border_frame = tk.Frame(sidebar_frame, bg='darkgreen')
+        ajustes_border_frame.pack(fill='both', expand=True, pady=(0, 5))
+        # MODIFICAÇÃO: LabelFrame "Ajustes Recentes" dentro da borda e com fonte preta
+        ajustes_container = tk.LabelFrame(ajustes_border_frame, text="Ajustes Recentes", padx=5, pady=5, bg='white', fg='black', relief='flat', bd=0)
+        ajustes_container.pack(padx=2, pady=2, fill='both', expand=True)
+
         frame_busca_ajustes = tk.Frame(ajustes_container, bg='white'); frame_busca_ajustes.pack(fill='x'); tk.Label(frame_busca_ajustes, text="Buscar:", bg='white').pack(side='left'); tk.Entry(frame_busca_ajustes, textvariable=self.busca_ajustes_var).pack(side='left', fill='x', expand=True, padx=5)
         
         ajustes_canvas_frame = tk.Frame(ajustes_container, bg='white', relief="solid", bd=1); ajustes_canvas_frame.pack(fill='both', expand=True, pady=(5,0))
@@ -341,7 +357,14 @@ class MemorialCalculoFrame(tk.Frame):
         ajustes_h_scrollbar.config(command=self.ajustes_canvas.xview)
         self.ajustes_items_frame.bind("<Configure>", lambda e: self.ajustes_canvas.configure(scrollregion=self.ajustes_canvas.bbox("all")))
         
-        rascunhos_container = tk.LabelFrame(sidebar_frame, text="Rascunhos", padx=5, pady=5, bg='white'); rascunhos_container.pack(fill='both', expand=True, pady=(5, 5)); frame_busca_rascunhos = tk.Frame(rascunhos_container, bg='white'); frame_busca_rascunhos.pack(fill='x'); tk.Label(frame_busca_rascunhos, text="Buscar:", bg='white').pack(side='left'); tk.Entry(frame_busca_rascunhos, textvariable=self.busca_rascunhos_var).pack(side='left', fill='x', expand=True, padx=5); frame_rascunhos_actions = tk.Frame(rascunhos_container, bg='white'); frame_rascunhos_actions.pack(fill='x', pady=(5,0)); ttk.Checkbutton(frame_rascunhos_actions, text="Selecionar Tudo", variable=self.selecionar_tudo_rascunhos_var, command=self._toggle_selecionar_tudo_rascunhos).pack(side='left'); tk.Button(frame_rascunhos_actions, text="X", fg="red", font=("Helvetica", 10, "bold"), command=self.deletar_rascunhos_selecionados, width=2, relief="flat", cursor="hand2", bg='white').pack(side='right', padx=(0,5))
+        # MODIFICAÇÃO INICIADA: Container da borda para "Rascunhos"
+        rascunhos_border_frame = tk.Frame(sidebar_frame, bg='darkgreen')
+        rascunhos_border_frame.pack(fill='both', expand=True, pady=(5, 5))
+        # MODIFICAÇÃO: LabelFrame "Rascunhos" dentro da borda e com fonte preta
+        rascunhos_container = tk.LabelFrame(rascunhos_border_frame, text="Rascunhos", padx=5, pady=5, bg='white', fg='black', relief='flat', bd=0)
+        rascunhos_container.pack(padx=2, pady=2, fill='both', expand=True)
+
+        frame_busca_rascunhos = tk.Frame(rascunhos_container, bg='white'); frame_busca_rascunhos.pack(fill='x'); tk.Label(frame_busca_rascunhos, text="Buscar:", bg='white').pack(side='left'); tk.Entry(frame_busca_rascunhos, textvariable=self.busca_rascunhos_var).pack(side='left', fill='x', expand=True, padx=5); frame_rascunhos_actions = tk.Frame(rascunhos_container, bg='white'); frame_rascunhos_actions.pack(fill='x', pady=(5,0)); ttk.Checkbutton(frame_rascunhos_actions, text="Selecionar Tudo", variable=self.selecionar_tudo_rascunhos_var, command=self._toggle_selecionar_tudo_rascunhos).pack(side='left'); tk.Button(frame_rascunhos_actions, text="X", fg="red", font=("Helvetica", 10, "bold"), command=self.deletar_rascunhos_selecionados, width=2, relief="flat", cursor="hand2", bg='white').pack(side='right', padx=(0,5))
         
         rascunhos_canvas_frame = tk.Frame(rascunhos_container, bg='white', relief="solid", bd=1); rascunhos_canvas_frame.pack(fill='both', expand=True, pady=5)
         rascunhos_h_scrollbar = ttk.Scrollbar(rascunhos_canvas_frame, orient="horizontal")
