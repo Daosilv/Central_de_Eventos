@@ -138,6 +138,10 @@ class AutocompleteCombobox(ttk.Combobox):
         super().__init__(*args, **kwargs)
         self._completion_list = []
         self.set_completion_list([])
+        
+        # Variável para controlar o estado da lista (aberta/fechada)
+        self._is_dropdown_open = False
+
         self.bind('<KeyRelease>', self._on_keyrelease)
         self.bind('<FocusOut>', self._on_focus_out)
 
@@ -147,32 +151,39 @@ class AutocompleteCombobox(ttk.Combobox):
     
     def _on_keyrelease(self, event):
         value = self.get().lower()
-        
-        if event.keysym in ("BackSpace", "Delete", "Left", "Right", "Home", "End"):
-            pass
 
+        # Se o usuário pressionar Escape, a lista fecha
+        if event.keysym == "Escape":
+            self._is_dropdown_open = False
+            return
+            
+        # Ignora teclas de navegação para não refiltrar a lista desnecessariamente
+        if event.keysym in ("Up", "Down", "Left", "Right", "Home", "End", "Return", "Tab"):
+            self._is_dropdown_open = True # Se está navegando, a lista está aberta
+            return
+
+        # Filtra a lista de valores com base no que foi digitado
         if value == '':
             self['values'] = self._completion_list
-            return
         else:
-            data = []
-            for item in self._completion_list:
-                if item.lower().startswith(value):
-                    data.append(item)
+            data = [item for item in self._completion_list if value in item.lower()]
+            self['values'] = data
             
-            if self['values'] != tuple(data):
-                self['values'] = data
+        # --- LÓGICA CORRIGIDA ---
+        # Se houver texto no campo e a lista ainda não estiver aberta,
+        # envia o evento para abrir a lista de sugestões.
+        if self.get() and not self._is_dropdown_open:
+            self.event_generate('<Down>')
+            self._is_dropdown_open = True
         
-        if self.get() and self['values']:
-             self.event_generate('<Down>')
+        # Se o usuário apagar todo o texto, a lista de sugestões se fecha.
+        if not self.get():
+             self.event_generate('<Escape>')
+             self._is_dropdown_open = False
 
     def _on_focus_out(self, event):
-        current_value = self.get()
-        if current_value and self['values'] and current_value not in self['values']:
-            if self['values'] and self['values'][0].lower().startswith(current_value.lower()):
-                self.set(self['values'][0])
-            else:
-                self.set('')
+        # Quando o campo perde o foco, reseta o controle da lista.
+        self._is_dropdown_open = False
 
 class MemorialCalculoFrame(tk.Frame):
     def __init__(self, parent, controller):
@@ -439,7 +450,6 @@ class MemorialCalculoFrame(tk.Frame):
 
         if issubclass(widget_class, ttk.Combobox):
             widget = widget_class(widget_container, **options)
-            widget.bind("<Button-1>", self.open_dropdown_on_click)
 
             if tipo_lista == 'geral' and categoria_db:
                 opcoes = [""] + self._get_opcoes_formatadas_geral(categoria_db)
@@ -597,7 +607,6 @@ class MemorialCalculoFrame(tk.Frame):
         combo_tensao.set_completion_list(opcoes_tensao)
         combo_tensao.grid(row=0, column=1, sticky="nsew")
         self.comboboxes_cabecalho['tensao_kv_rede'] = combo_tensao
-        combo_tensao.bind("<Button-1>", self.open_dropdown_on_click)
 
         params_tensao = [("Carga - fase A [A]", self.campos_dict["carga_fase_a"]), ("Carga - fase B [A]", self.campos_dict["carga_fase_b"]), ("Carga - fase C [A]", self.campos_dict["carga_fase_c"])]
         for i, (label, var) in enumerate(params_tensao): 
@@ -824,10 +833,6 @@ class MemorialCalculoFrame(tk.Frame):
         if sys.platform == "win32": self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
         else: self.canvas.yview_scroll(-1 if event.num == 4 else 1, "units")
 
-    def open_dropdown_on_click(self, event):
-        widget = event.widget
-        widget.after(10, lambda: widget.event_generate('<Down>'))
-
     def _cell(self, frame, r, c, txt="", rs=1, cs=1, sticky="nsew", font=None):
         outer = tk.Frame(frame, relief="solid", bd=1, bg='white')
         outer.grid(row=r, column=c, rowspan=rs, columnspan=cs, sticky=sticky)
@@ -855,7 +860,6 @@ class MemorialCalculoFrame(tk.Frame):
         group_vars["sequencia"].trace_add("write", _sync_seq); group_vars["sequencia"].trace_add("write", _manage_rapida); tk.Label(frame_tabela, text=group_name, relief="solid", bd=1, font=FONTE_PADRAO, bg='white').grid(row=1, column=0, rowspan=3, sticky="nsew"); tk.Label(frame_tabela, text="FASE", relief="solid", bd=1, font=FONTE_PADRAO, bg='white').grid(row=1, column=1, columnspan=2, sticky="nsew"); 
         lenta_fase_cell = tk.Frame(frame_tabela, relief="solid", bd=1, bg='white'); 
         combo_lenta = ttk.Combobox(lenta_fase_cell, textvariable=group_vars["curva_lenta_tipo"], values=["", "IEC Muito Inversa", "IEC Ext. Inversa"], state="readonly", font=FONTE_PEQUENA, justify="center", style='Arrowless.TCombobox', width=18); 
-        combo_lenta.bind("<Button-1>", self.open_dropdown_on_click); 
         combo_lenta.pack(fill='both', expand=True); 
         lenta_fase_cell.grid(row=1, column=3, sticky="nsew"); 
         self._cell(frame_tabela, 1, 4, "IEC Inversa"); 
@@ -864,7 +868,8 @@ class MemorialCalculoFrame(tk.Frame):
         tk.Label(frame_tabela, text="T. Definido", relief="solid", bd=1, font=FONTE_PADRAO, bg='white').grid(row=1, column=8, sticky="nsew"); 
         tk.Entry(frame_tabela, textvariable=group_vars["pickup_fase"], font=FONTE_PADRAO, width=4, relief="solid", bd=1, justify="center", validate="key", validatecommand=(self.vcmd_4, "%P")).grid(row=1, column=1, rowspan=3, sticky="nsew"); 
         cell_seq = tk.Frame(frame_tabela, relief="solid", bd=1, bg='white'); cell_seq.grid_propagate(False); cell_seq.grid(row=1, column=2, rowspan=3, sticky="nsew"); 
-        combo_seq = ttk.Combobox(cell_seq, textvariable=group_vars["sequencia"], values=["", "1L", "2L", "3L", "1R+3L", "1R+2L", "2R+2L"], state="readonly", font=FONTE_PADRAO, justify="center", width=8, style='Arrowless.TCombobox'); combo_seq.bind("<Button-1>", self.open_dropdown_on_click); combo_seq.pack(fill="both", expand=True); 
+        combo_seq = ttk.Combobox(cell_seq, textvariable=group_vars["sequencia"], values=["", "1L", "2L", "3L", "1R+3L", "1R+2L", "2R+2L"], state="readonly", font=FONTE_PADRAO, justify="center", width=8, style='Arrowless.TCombobox'); 
+        combo_seq.pack(fill="both", expand=True); 
         tk.Entry(frame_tabela, textvariable=group_vars["pickup_terra"], font=FONTE_PADRAO, width=4, relief="solid", bd=1, justify="center", validate="key", validatecommand=(self.vcmd_4, "%P")).grid(row=1, column=5, rowspan=3, sticky="nsew"); 
         cell_seq_terra = tk.Frame(frame_tabela, relief="solid", bd=1, bg='white'); cell_seq_terra.grid_propagate(False); cell_seq_terra.grid(row=1, column=6, rowspan=3, sticky="nsew"); 
         tk.Label(cell_seq_terra, textvariable=group_vars["sequencia_terra"], font=FONTE_PADRAO, justify="center", bg='white').pack(fill="both", expand=True); 
@@ -896,7 +901,8 @@ class MemorialCalculoFrame(tk.Frame):
         tk.Entry(frame_tabela, textvariable=group_vars["pickup_fase"], font=FONTE_PADRAO, width=4, relief="solid", bd=1, justify="center", validate="key", validatecommand=(self.vcmd_4, "%P")).grid(row=0, column=1, rowspan=3, sticky="nsew")
         
         cell_seq = tk.Frame(frame_tabela, relief="solid", bd=1, bg='white'); cell_seq.grid_propagate(False); cell_seq.grid(row=0, column=2, rowspan=3, sticky="nsew")
-        combo_seq = ttk.Combobox(cell_seq, textvariable=group_vars["sequencia"], values=["", "1L", "2L", "3L"], state="readonly", font=FONTE_PADRAO, justify="center", width=8, style='Arrowless.TCombobox'); combo_seq.bind("<Button-1>", self.open_dropdown_on_click); combo_seq.pack(fill="both", expand=True)
+        combo_seq = ttk.Combobox(cell_seq, textvariable=group_vars["sequencia"], values=["", "1L", "2L", "3L"], state="readonly", font=FONTE_PADRAO, justify="center", width=8, style='Arrowless.TCombobox'); 
+        combo_seq.pack(fill="both", expand=True)
 
         self._cell(frame_tabela, 0, 3, "SECCIONALIZADOR", font=FONTE_MUITO_PEQUENA)
         sub_lenta = tk.Frame(frame_tabela, bd=0, bg='white'); sub_lenta.grid_propagate(False); sub_lenta.grid(row=1, column=3, rowspan=2, sticky="nsew"); [sub_lenta.grid_rowconfigure(r, weight=1) for r in range(2)]; [sub_lenta.grid_columnconfigure(c, weight=1) for c in range(2)] 
