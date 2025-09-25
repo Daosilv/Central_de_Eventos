@@ -207,13 +207,6 @@ class AutocompleteCombobox(ttk.Entry):
         self._hide_popup()
 
     def _on_focus_in(self, event):
-        """Lida com o widget recebendo o foco."""
-        # Se o foco for ganho imediatamente após uma seleção, consome a flag
-        # e não faz nada, para evitar que o popup reapareça com um único item.
-        if self._just_selected:
-            self._just_selected = False
-            return
-            
         self._update_listbox()
         if self.listbox.size() > 0:
             self._show_popup()
