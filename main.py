@@ -118,7 +118,7 @@ class App(tk.Tk):
     def delete_ajuda(self, ajuda_id):
         return self.model.delete_ajuda(ajuda_id)
 
-    # --- MÉTODOS PARA TEMPO MORTO ---
+    # --- MÉTODOS PAR TEMPO MORTO ---
     def get_all_tempo_morto(self):
         return self.model.get_all_tempo_morto()
     def add_tempo_morto(self, data):

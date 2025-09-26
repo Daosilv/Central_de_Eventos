@@ -172,7 +172,6 @@ class AutocompleteCombobox(ttk.Entry):
         y = self.winfo_rooty() + self.winfo_height()
         width = max(self.winfo_width(), 150)
         self.popup.geometry(f"{width}x150+{x}+{y}")
-<<<<<<< HEAD
 
     def _show_popup(self):
         if not self._popup_open and self.listbox.size() > 0:
@@ -208,49 +207,6 @@ class AutocompleteCombobox(ttk.Entry):
         self._hide_popup()
 
     def _on_focus_in(self, event):
-        # Se o foco foi ganho por causa de uma seleção,
-        # reseta a flag e não faz mais nada.
-        if self._just_selected:
-            self._just_selected = False
-            return
-
-=======
-
-    def _show_popup(self):
-        if not self._popup_open and self.listbox.size() > 0:
-            self._position_popup()
-            self.popup.deiconify()
-            self._popup_open = True
-            topo = self.winfo_toplevel()
-            topo.bind_all("<Button-1>", self._on_global_click, add="+")
-            topo.bind_all("<MouseWheel>", self._on_scroll, add="+")
-            topo.bind_all("<Button-4>", self._on_scroll, add="+")
-            topo.bind_all("<Button-5>", self._on_scroll, add="+")
-
-    def _hide_popup(self):
-        if self._popup_open:
-            self.popup.withdraw()
-            self._popup_open = False
-            topo = self.winfo_toplevel()
-            try:
-                topo.unbind_all("<Button-1>")
-                topo.unbind_all("<MouseWheel>")
-                topo.unbind_all("<Button-4>")
-                topo.unbind_all("<Button-5>")
-            except:
-                pass
-
-    def _on_global_click(self, event):
-        w = event.widget
-        if w in (self, self.listbox) or w.winfo_toplevel() is self.popup:
-            return
-        self._hide_popup()
-
-    def _on_scroll(self, event):
-        self._hide_popup()
-
-    def _on_focus_in(self, event):
->>>>>>> eefdc70c966677f2ea1925b9b1cbea0ca3adc797
         self._update_listbox()
         if self.listbox.size() > 0:
             self._show_popup()
@@ -259,24 +215,9 @@ class AutocompleteCombobox(ttk.Entry):
         self.after(100, self._check_focus_lost)
 
     def _check_focus_lost(self):
-<<<<<<< HEAD
-        # Garante que o widget ainda existe antes de prosseguir.
-        if not self.winfo_exists():
-            return
-
-        try:
-            focused = self.winfo_toplevel().focus_get()
-            if focused not in (self, self.listbox, self.popup):
-                self._hide_popup()
-        except KeyError:
-            # Captura o erro caso o widget em foco seja destruído
-            # em um raro caso de "corrida" de eventos.
-            pass
-=======
         focused = self.winfo_toplevel().focus_get()
         if focused not in (self, self.listbox, self.popup):
             self._hide_popup()
->>>>>>> eefdc70c966677f2ea1925b9b1cbea0ca3adc797
 
     def _on_key_release(self, event):
         # Após seleção, ignorar primeiramente
